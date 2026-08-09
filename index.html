@@ -1690,9 +1690,12 @@ const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&
 let ROSTER = [];
 function fillRoster(list){
   ROSTER = list || [];
-  /* datalist yalnızca yazarken öneri gösterir — serbest yazım engellenmez */
-  $("#rosterList").innerHTML = ROSTER.map(n=>`<option value="${esc(n)}">`).join("");
-  $("#statTeam").textContent = ROSTER.length;
+  /* Giriş yapıldıktan sonra form (ve içindeki datalist) DOM'dan kalkar.
+     Bu yüzden her iki öğe de yoksa sessizce geçilir — tablo etkilenmez. */
+  const dl = $("#rosterList");
+  if(dl) dl.innerHTML = ROSTER.map(n=>`<option value="${esc(n)}">`).join("");
+  const st = $("#statTeam");
+  if(st) st.textContent = ROSTER.length;
 }
 
 /* Türkçe uyumlu sadeleştirme — sunucudaki norm() ile aynı mantık */
@@ -1860,8 +1863,9 @@ async function loadBoard(){
     const r = await api.get({action:"board", total:total});
     if(!r) throw new Error("Boş yanıt");
     if(r.ok === false) throw new Error(r.error || "Sunucu hatası");
-    if(r.roster && r.roster.length) fillRoster(r.roster);
+    /* Tablo önce çizilir: yan işlerden biri hata verse bile tablo boş kalmaz */
     renderBoard(r.rows||[], "Son güncelleme: " + new Date().toLocaleString("tr-TR"));
+    try{ if(r.roster && r.roster.length) fillRoster(r.roster); }catch(err){}
   }catch(e){
     renderBoard([], "Sunucuya ulaşılamadı — " + (e && e.message ? e.message : e));
   }
