@@ -807,8 +807,8 @@ footer{
     <h2 class="sec rv" data-d="1">Şu an alınacak üç eğitim</h2>
     <p class="sec-sub rv" data-d="2">
       Videolar sayfanın içinde oynar. Sistem gerçek izleme süreni ölçer: ileri sararsan o bölüm sayılmaz,
-      videonun <b>%90'ını</b> izlemeden "Tamamladım" düğmesi açılmaz. Arada kısa bir <b>"buradayım"</b> kontrolü çıkar —
-      tıklamazsan sayaç durur.
+      videonun <b>%90'ını</b> izlemeden "Tamamladım" düğmesi açılmaz. <b>10 dakika</b> boyunca sayfada hiç hareket
+      olmazsa kısa bir <b>"buradayım"</b> kontrolü çıkar; tıklamazsan sayaç durur.
     </p>
     <div id="courses"></div>
   </div>
@@ -948,10 +948,10 @@ const CONFIG = {
   /* Tamamlanmış sayılmak için gereken gerçek izleme oranı */
   THRESHOLD: 0.90,
 
-  /* Varlık kontrolü: video başına kaç kez sorulacak (süreye göre) */
-  PRESENCE_MIN: 1,
-  PRESENCE_MAX: 3,
-  PRESENCE_TIMEOUT: 25 /* saniye */
+  /* Varlık kontrolü: kaç DAKİKA boyunca hiç tıklama/tuş olmazsa sorulur.
+     Etkileşim olduğu sürece hiç sorulmaz — sayaç her tıklamada sıfırlanır. */
+  PRESENCE_IDLE_MIN: 10,
+  PRESENCE_TIMEOUT: 25 /* saniye — soru ekranda kalınca sayaç durur */
 };
 
 /* ============================================================
@@ -1366,7 +1366,7 @@ function renderCourses(){
           <div class="presence" id="pr_${t.id}">
             <div>
               <h4>Hâlâ orada mısın?</h4>
-              <p>Videoyu arka planda açık bırakmadığından emin oluyoruz. Devam etmek için tıkla.</p>
+              <p>10 dakikadır sayfada hareket yok. Videonun arka planda boşuna oynamadığından emin oluyoruz — devam etmek için tıkla.</p>
               <button class="btn btn-p" data-pres="${t.id}">Buradayım, devam et</button>
               <div class="ring" id="rg_${t.id}">${CONFIG.PRESENCE_TIMEOUT} saniye</div>
             </div>
@@ -1452,6 +1452,7 @@ function updateMe(){
    ============================================================ */
 const engine = {
   players:{}, active:null, timer:null, ready:false, queue:[],
+  lastAct: Date.now(),        // son kullanıcı etkileşimi
 
   loadAPI(){
     if(window.YT && window.YT.Player){ this.ready = true; this.flush(); return; }
@@ -1543,7 +1544,8 @@ const engine = {
   },
 
   bind(topic, index){
-    this.active = {topic, index, lastB:null, presence:[], waiting:false, wait:null};
+    this.active = {topic, index, lastB:null, waiting:false, wait:null};
+    this.lastAct = Date.now();          // yeni videoda sayaç sıfırlanır
     $("#wt_"+topic.id).textContent = (index+1)+". video";
     renderChips(topic);
     this.paint();
@@ -1556,9 +1558,6 @@ const engine = {
       const i = p.getPlaylistIndex();
       if(!this.active || this.active.topic.id!==topic.id || this.active.index!==i){
         this.bind(topic, i);
-        this.planPresence(p.getDuration());
-      }else if(!this.active.presence.length){
-        this.planPresence(p.getDuration());
       }
     }
     if(e.data === YT.PlayerState.ENDED){
@@ -1568,17 +1567,6 @@ const engine = {
         toast("Video bitti — 'Tamamladım' düğmesi açık.");
       }
     }
-  },
-
-  planPresence(dur){
-    if(!this.active || !dur) return;
-    let k = dur < 300 ? CONFIG.PRESENCE_MIN : dur < 900 ? 2 : CONFIG.PRESENCE_MAX;
-    const pts = [];
-    for(let i=1;i<=k;i++){
-      const base = dur * (i/(k+1));
-      pts.push(clamp(base + (Math.random()-.5)*dur*0.12, 15, dur-12));
-    }
-    this.active.presence = pts.sort((a,b)=>a-b);
   },
 
   tick(){
@@ -1607,9 +1595,8 @@ const engine = {
     }
     a.lastB = b;
 
-    /* varlık kontrolü zamanı geldi mi */
-    if(a.presence.length && cur >= a.presence[0]){
-      a.presence.shift();
+    /* varlık kontrolü: uzun süre hiç tıklama/tuş yoksa sor */
+    if(Date.now() - this.lastAct > CONFIG.PRESENCE_IDLE_MIN * 60000){
       this.askPresence(a.topic.id, p);
     }
     this.paint();
@@ -1626,6 +1613,7 @@ const engine = {
   presenceOk(tid){
     const a = this.active; if(!a) return;
     a.waiting = false; a.lastB = null;
+    this.lastAct = Date.now();          // sayaç yeniden başlar
     $("#pr_"+tid).classList.remove("on");
     const p = this.players[tid]; if(p) p.playVideo();
   },
@@ -1683,22 +1671,61 @@ const engine = {
     if(a.index+1 < n){
       setTimeout(()=>{
         const p = this.players[tid];
-        if(p){ p.playVideoAt(a.index+1); this.bind(a.topic, a.index+1); this.planPresence(0); }
+        if(p){ p.playVideoAt(a.index+1); this.bind(a.topic, a.index+1); }
       }, 900);
     }
   }
 };
 window.onYouTubeIframeAPIReady = function(){ engine.ready = true; engine.flush(); };
 
+/* Kullanıcı etkileşimi sayacı — her tıklama/tuş varlık kontrolünü erteler */
+["pointerdown","keydown","touchstart","wheel"].forEach(ev=>
+  addEventListener(ev, ()=>{ engine.lastAct = Date.now(); }, {passive:true, capture:true}));
+
 /* ============================================================
    GİRİŞ
    ============================================================ */
 const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
+let ROSTER = [];
 function fillRoster(list){
+  ROSTER = list || [];
   /* datalist yalnızca yazarken öneri gösterir — serbest yazım engellenmez */
-  $("#rosterList").innerHTML = list.map(n=>`<option value="${esc(n)}">`).join("");
-  $("#statTeam").textContent = list.length;
+  $("#rosterList").innerHTML = ROSTER.map(n=>`<option value="${esc(n)}">`).join("");
+  $("#statTeam").textContent = ROSTER.length;
+}
+
+/* Türkçe uyumlu sadeleştirme — sunucudaki norm() ile aynı mantık */
+function normTR(s){
+  return String(s||"").trim().replace(/\s+/g," ")
+    .replace(/[İIı]/g,"i").replace(/[Şş]/g,"s").replace(/[Ğğ]/g,"g")
+    .replace(/[Üü]/g,"u").replace(/[Öö]/g,"o").replace(/[Çç]/g,"c")
+    .replace(/[Ââ]/g,"a").toLowerCase();
+}
+/* iki metin arasındaki düzenleme mesafesi */
+function lev(a,b){
+  const m=a.length, n=b.length;
+  if(!m) return n; if(!n) return m;
+  let prev=Array.from({length:n+1},(_,j)=>j), cur=new Array(n+1);
+  for(let i=1;i<=m;i++){
+    cur[0]=i;
+    for(let j=1;j<=n;j++){
+      cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    }
+    [prev,cur]=[cur,prev];
+  }
+  return prev[n];
+}
+/* yazılan isim listede yoksa en yakın adayı bul */
+function closestName(typed){
+  const t = normTR(typed); if(!t || !ROSTER.length) return null;
+  let best=null, bd=Infinity;
+  ROSTER.forEach(nm=>{
+    const x = normTR(nm);
+    const d = (x.startsWith(t) || t.startsWith(x) || x.indexOf(t)>=0) ? 0.5 : lev(t,x);
+    if(d < bd){ bd = d; best = nm; }
+  });
+  return bd <= 3 ? best : null;
 }
 
 /* Sunucuya gidemeyen kayıtlar kuyrukta bekler, bağlantı gelince gönderilir */
@@ -1738,7 +1765,7 @@ async function doLogin(){
   const btn = $("#btnLogin");
   const n = $("#inName").value.trim().replace(/\s+/g," ");
   const p = $("#inPin").value.trim();
-  if(n.length < 3) return toast("Adını ve soyadını yaz.", true);
+  if(n.length < 2) return toast("Adını yaz — ekip liderinin listesindeki gibi.", true);
   if(!/^\d{4}$/.test(p)) return toast("4 haneli kodu gir.", true);
 
   if(!api.on()){                       /* yerel mod — ortak kod */
@@ -1752,7 +1779,17 @@ async function doLogin(){
   try{
     const r = await api.get({action:"auth", name:n, pin:p});
     if(!r || !r.ok){
-      toast(r && r.error === "pin" ? "Kod hatalı." : "Bu isim listede yok — yazımını kontrol et.", true);
+      if(r && r.error === "pin"){
+        toast("Kod hatalı. Ekip liderinin sana özel gönderdiği 4 haneyi gir.", true);
+      }else{
+        const g = closestName(n);
+        if(g){
+          toast(`Listede "${n}" yok. "${g}" mi demek istedin?`, true);
+          $("#inName").value = g; $("#inName").focus(); $("#inName").select();
+        }else{
+          toast("Bu isim listede yok. Ekip liderine listede nasıl yazıldığını sor.", true);
+        }
+      }
       return;
     }
     /* sunucudaki yazımı esas al, ilerlemeyi geri yükle */
