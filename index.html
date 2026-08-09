@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dicle Mechatronics — Elektronik Ekibi</title>
+<meta name="description" content="Elektronik Ekibi yaz kampı eğitim programı ve ilerleme takibi. 10 Ağustos – 21 Eylül 2026.">
+<meta name="theme-color" content="#05080f">
+
+<!-- WhatsApp / sosyal medya link önizlemesi.
+     Yayınladıktan sonra og:image'ı tam adrese çevirirsen her yerde görünür:
+     content="https://kullaniciadin.github.io/dicle-mechatronics/og.jpg" -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dicle Mechatronics — Elektronik Ekibi">
+<meta property="og:description" content="Yaz kampı eğitim programı. Üç başlık, 48 video, 6 hafta. Ölçüm → Kod → Haberleşme.">
+<meta property="og:image" content="og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2300e5a0'/%3E%3Ctext x='32' y='43' font-family='monospace' font-size='30' font-weight='bold' text-anchor='middle' fill='%23041a12'%3EDM%3C/text%3E%3C/svg%3E">
+<style>
+/* ============================================================
+   DICLE MECHATRONICS — ELEKTRONİK EKİBİ
+   Tek dosya. Harici bağımlılık yok (sadece YouTube IFrame API).
+   ============================================================ */
+
+:root{
+  --bg:#05080f;
+  --bg-2:#0a111c;
+  --panel:#0d1725;
+  --panel-2:#111f31;
+  --line:#1c2f47;
+  --line-soft:#152438;
+  --txt:#e6f0fa;
+  --txt-2:#8fa6c0;
+  --txt-3:#5d738d;
+  --acc:#00e5a0;
+  --acc-dim:#00a877;
+  --blue:#38bdf8;
+  --amber:#fbbf24;
+  --red:#f2545b;
+  --violet:#a78bfa;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r:14px;
+  --maxw:1180px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);color:var(--txt);font-family:var(--sans);
+  line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--acc);color:#04120c}
+a{color:var(--acc);text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit}
+
+/* ---------- Arka plan ızgara + parıltı ---------- */
+.bg-fx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-fx .grid{
+  position:absolute;inset:-2px;
+  background-image:
+    linear-gradient(rgba(0,229,160,.045) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,160,.045) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 20%,transparent 78%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 20%,transparent 78%);
+}
+.bg-fx .glow{
+  position:absolute;border-radius:50%;filter:blur(110px);opacity:.5;
+}
+.bg-fx .g1{width:620px;height:620px;background:#00e5a022;top:-260px;left:-160px}
+.bg-fx .g2{width:520px;height:520px;background:#38bdf81f;top:18%;right:-220px}
+.bg-fx .g3{width:560px;height:560px;background:#a78bfa16;top:62%;left:-240px}
+
+/* ---------- Genel yerleşim ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;position:relative;z-index:1}
+section{padding:88px 0;position:relative;z-index:1}
+@media(max-width:640px){section{padding:60px 0}}
+
+.eyebrow{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--acc);display:flex;align-items:center;gap:10px;margin-bottom:14px;
+}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--acc);opacity:.7}
+h2.sec{
+  font-size:clamp(25px,4.2vw,38px);line-height:1.18;font-weight:750;letter-spacing:-.022em;
+  margin-bottom:12px;
+}
+.sec-sub{color:var(--txt-2);max-width:66ch;font-size:15.5px;margin-bottom:38px}
+
+/* ---------- Scroll reveal ---------- */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}
+.rv.in{opacity:1;transform:none}
+.rv[data-d="1"]{transition-delay:.08s}
+.rv[data-d="2"]{transition-delay:.16s}
+.rv[data-d="3"]{transition-delay:.24s}
+.rv[data-d="4"]{transition-delay:.32s}
+.rv[data-d="5"]{transition-delay:.4s}
+@media(prefers-reduced-motion:reduce){
+  .rv{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:rgba(5,8,15,0);border-bottom:1px solid transparent;
+  transition:background .3s,border-color .3s;
+}
+.nav.solid{background:rgba(5,8,15,.86);border-bottom-color:var(--line-soft)}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:-.01em;font-size:15px}
+.brand .chip{
+  width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none;
+  background:linear-gradient(140deg,var(--acc),#0891b2);color:#04120c;
+  font-family:var(--mono);font-weight:800;font-size:13px;
+  box-shadow:0 0 22px rgba(0,229,160,.34);
+}
+.brand small{display:block;font-size:10.5px;color:var(--txt-3);font-weight:500;letter-spacing:.1em;text-transform:uppercase;line-height:1}
+.nav-links{margin-left:auto;display:flex;gap:5px;align-items:center}
+.nav-links a{
+  color:var(--txt-2);font-size:13.5px;padding:7px 12px;border-radius:8px;transition:.2s;font-weight:500;
+}
+.nav-links a:hover{color:var(--txt);background:var(--panel)}
+@media(max-width:860px){.nav-links{display:none}}
+.nav-me{
+  margin-left:auto;display:flex;align-items:center;gap:9px;
+  background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  padding:5px 13px 5px 6px;font-size:13px;font-weight:600;
+}
+.nav-me .av{
+  width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;
+  background:var(--acc);color:#04120c;font-size:10.5px;font-weight:800;font-family:var(--mono);
+}
+.nav-me .pc{font-family:var(--mono);color:var(--acc);font-size:12px}
+@media(max-width:860px){.nav-links+.nav-me{margin-left:0}}
+
+/* ============================================================
+   SİNEMATİK SCROLL HERO  (kare dizisi)
+   ============================================================ */
+.scrolly{height:460vh;position:relative;z-index:1}
+body.nofilm .scrolly{height:auto}
+.stage{
+  position:sticky;top:0;height:100svh;overflow:hidden;
+  background:#05080f;display:flex;align-items:flex-end;
+}
+body.nofilm .stage{position:relative;height:auto;min-height:0;background:none}
+body.nofilm .stage>#film,
+body.nofilm .stage>.film-load,
+body.nofilm .stage>.film-scrim,
+body.nofilm .stage>.film-ui,
+body.nofilm .stage>.scroll-hint{display:none}
+#film{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+.film-scrim{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(180deg,rgba(5,8,15,.82) 0%,rgba(5,8,15,0) 26%),
+    linear-gradient(0deg,rgba(5,8,15,.9) 0%,rgba(5,8,15,0) 42%);
+}
+.film-ui{position:relative;z-index:3;width:100%;padding:0 0 46px}
+.rail-row{display:flex;align-items:flex-end;gap:22px;padding:26px 34px 0}
+.film-idx{
+  font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--txt-3);
+  padding-bottom:2px;flex:none;
+}
+.film-idx b{color:var(--acc);font-size:15px}
+.film-cue{
+  margin-left:auto;flex:none;display:flex;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--txt-3);padding-bottom:2px;transition:opacity .5s;
+  animation:cue 2.4s ease-in-out infinite;
+}
+@keyframes cue{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+.film-cue.hide{opacity:0}
+@media(max-width:640px){
+  .rail-row{padding:22px 20px 0;gap:14px}
+  .film-cue{display:none}
+}
+
+.film-cap{position:relative;padding:0 34px;min-height:186px}
+.cap{
+  position:absolute;left:34px;right:34px;bottom:0;
+  opacity:0;transform:translateY(26px);
+  transition:opacity .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;
+}
+.cap.on{opacity:1;transform:none}
+.cap .no{
+  font-family:var(--mono);font-size:12px;letter-spacing:.24em;color:var(--acc);
+  display:flex;align-items:center;gap:11px;margin-bottom:14px;
+}
+.cap .no::after{content:"";height:1px;width:54px;background:linear-gradient(90deg,var(--acc),transparent)}
+.cap h2{
+  font-size:clamp(28px,5.2vw,58px);line-height:1.04;font-weight:800;letter-spacing:-.035em;
+  margin-bottom:10px;max-width:19ch;
+}
+.cap p{color:var(--txt-2);font-size:clamp(14px,1.6vw,17px);max-width:46ch}
+
+.film-rail{display:flex;gap:9px;flex:1;min-width:0;max-width:680px}
+.seg{flex:1;min-width:0}
+.seg i{display:block;height:3px;border-radius:99px;background:var(--line);overflow:hidden;position:relative}
+.seg i::after{
+  content:"";position:absolute;inset:0;width:var(--f,0%);border-radius:99px;
+  background:linear-gradient(90deg,var(--acc-dim),var(--acc));box-shadow:0 0 10px rgba(0,229,160,.6);
+}
+.seg span{
+  display:block;margin-top:9px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3);transition:color .3s;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.seg.on span{color:var(--txt)}
+@media(max-width:640px){
+  .film-cap{padding:0 20px;min-height:200px}
+  .cap{left:20px;right:20px}
+  .film-rail{padding:22px 20px 0}
+  .seg span{font-size:9px;letter-spacing:.08em}
+  .film-top{padding:74px 20px 0}
+}
+
+/* yükleme göstergesi */
+.film-load{
+  position:absolute;inset:0;z-index:4;display:grid;place-items:center;
+  background:#05080f;transition:opacity .6s;text-align:center;
+}
+.film-load.done{opacity:0;pointer-events:none}
+.fl-bar{width:min(240px,52vw);height:2px;background:var(--line);border-radius:99px;overflow:hidden;margin:0 auto 14px}
+.fl-bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .25s;box-shadow:0 0 10px var(--acc)}
+.film-load span{
+  font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3);
+}
+
+/* ============================================================
+   BAŞLIK BLOĞU
+   ============================================================ */
+.hero{
+  min-height:auto;display:flex;align-items:center;position:relative;
+  padding:96px 0 70px;overflow:hidden;
+}
+/* Seedance / arka plan videosu — CONFIG.HERO_VIDEO doluysa devreye girer */
+.hero-video{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;
+  opacity:0;transition:opacity 1.4s ease;pointer-events:none;
+}
+.hero-video.on{opacity:.42}
+.hero-veil{
+  position:absolute;inset:0;z-index:1;pointer-events:none;display:none;
+  background:
+    linear-gradient(90deg,rgba(5,8,15,.94) 0%,rgba(5,8,15,.72) 46%,rgba(5,8,15,.34) 100%),
+    linear-gradient(0deg,rgba(5,8,15,.85) 0%,rgba(5,8,15,0) 52%);
+}
+body.hasvideo .hero-veil{display:block}
+body.hasvideo .hero-svg{opacity:.35}
+.hero-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:.85}
+.trace{fill:none;stroke:rgba(0,229,160,.16);stroke-width:1.4}
+.trace-lit{
+  fill:none;stroke:var(--acc);stroke-width:1.7;
+  stroke-dasharray:56 1400;filter:drop-shadow(0 0 6px rgba(0,229,160,.85));
+  animation:flow 7s linear infinite;
+}
+@keyframes flow{to{stroke-dashoffset:-1456}}
+.pad{fill:#05080f;stroke:rgba(0,229,160,.4);stroke-width:1.4}
+.pad-lit{fill:var(--acc);animation:padPulse 3.2s ease-in-out infinite}
+@keyframes padPulse{0%,100%{opacity:.25}50%{opacity:1}}
+
+.hero-in{position:relative;z-index:2;width:100%}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:9px;
+  background:rgba(0,229,160,.09);border:1px solid rgba(0,229,160,.3);
+  color:var(--acc);padding:6px 14px;border-radius:999px;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:24px;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--acc);animation:blink 1.9s infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,229,160,.6)}50%{opacity:.35;box-shadow:0 0 0 7px rgba(0,229,160,0)}}
+
+h1{
+  font-size:clamp(38px,7.4vw,76px);line-height:1.02;font-weight:800;letter-spacing:-.038em;
+  margin-bottom:20px;
+}
+h1 .l2{
+  display:block;
+  background:linear-gradient(105deg,var(--acc) 0%,var(--blue) 48%,var(--violet) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-lead{font-size:clamp(15.5px,2vw,18.5px);color:var(--txt-2);max-width:56ch;margin-bottom:34px}
+.hero-lead b{color:var(--txt);font-weight:600}
+
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:52px}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;
+  font-weight:650;font-size:14.5px;transition:.22s;border:1px solid transparent;
+}
+.btn-p{background:var(--acc);color:#04120c;box-shadow:0 6px 26px rgba(0,229,160,.3)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(0,229,160,.42)}
+.btn-g{background:var(--panel);border-color:var(--line);color:var(--txt)}
+.btn-g:hover{border-color:var(--acc);color:var(--acc);transform:translateY(-2px)}
+
+/* geri sayım */
+.countdown{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:520px;
+}
+.cd{
+  background:rgba(13,23,37,.72);border:1px solid var(--line);border-radius:12px;
+  padding:14px 8px;text-align:center;backdrop-filter:blur(8px);
+}
+.cd b{
+  display:block;font-family:var(--mono);font-size:clamp(22px,4.6vw,32px);
+  font-weight:700;color:var(--acc);line-height:1;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+}
+.cd span{font-size:10.5px;color:var(--txt-3);letter-spacing:.14em;text-transform:uppercase;margin-top:6px;display:block}
+.cd-label{
+  font-family:var(--mono);font-size:11.5px;color:var(--txt-3);
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:11px;
+}
+
+.scroll-hint{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;
+  color:var(--txt-3);font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;
+  text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:8px;
+  animation:bob 2.4s ease-in-out infinite;
+}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,7px)}}
+@media(max-height:700px){.scroll-hint{display:none}}
+
+/* ============================================================
+   İSTATİSTİK ŞERİDİ
+   ============================================================ */
+.stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;
+  background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--r);overflow:hidden;
+}
+.stat{background:var(--bg-2);padding:24px 20px}
+.stat b{display:block;font-family:var(--mono);font-size:31px;font-weight:750;letter-spacing:-.03em;line-height:1;margin-bottom:7px}
+.stat span{font-size:12.5px;color:var(--txt-3);letter-spacing:.03em}
+.stat:nth-child(1) b{color:var(--acc)}
+.stat:nth-child(2) b{color:var(--blue)}
+.stat:nth-child(3) b{color:var(--violet)}
+.stat:nth-child(4) b{color:var(--amber)}
+
+/* ============================================================
+   KİMLİK / GİRİŞ
+   ============================================================ */
+.gate{
+  background:linear-gradient(150deg,var(--panel),var(--bg-2));
+  border:1px solid var(--line);border-radius:18px;padding:30px;
+  display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center;
+}
+@media(max-width:760px){.gate{grid-template-columns:1fr;gap:20px}}
+.gate h3{font-size:20px;font-weight:700;letter-spacing:-.015em;margin-bottom:7px}
+.gate p{color:var(--txt-2);font-size:14px;max-width:52ch}
+.gate-form{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fld{
+  background:var(--bg);border:1px solid var(--line);border-radius:10px;
+  padding:12px 14px;color:var(--txt);font-size:14.5px;min-width:172px;outline:none;transition:.2s;
+}
+.fld:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(0,229,160,.14)}
+.fld::placeholder{color:var(--txt-3)}
+select.fld{cursor:pointer}
+.pin{width:104px;font-family:var(--mono);letter-spacing:.34em;text-align:center}
+
+/* ============================================================
+   YOL HARİTASI
+   ============================================================ */
+.road{position:relative;padding-left:38px}
+.road::before{
+  content:"";position:absolute;left:13px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(180deg,var(--acc) 0%,var(--acc) var(--road-fill,25%),var(--line) var(--road-fill,25%),var(--line) 100%);
+  border-radius:2px;
+}
+.node{position:relative;padding:0 0 26px}
+.node::before{
+  content:"";position:absolute;left:-31px;top:17px;width:12px;height:12px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--line);z-index:2;
+}
+.node.active::before{background:var(--acc);border-color:var(--acc);box-shadow:0 0 0 5px rgba(0,229,160,.16)}
+.node-card{
+  background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;
+  padding:16px 18px;display:flex;align-items:center;gap:15px;transition:.25s;
+}
+.node.active .node-card{border-color:rgba(0,229,160,.34);background:linear-gradient(100deg,rgba(0,229,160,.07),var(--panel) 55%)}
+.node.locked .node-card{opacity:.45}
+.node-card:hover{transform:translateX(4px)}
+.node-no{
+  font-family:var(--mono);font-size:15px;font-weight:700;color:var(--txt-3);
+  width:26px;flex:none;text-align:center;
+}
+.node.active .node-no{color:var(--acc)}
+.node-body{flex:1;min-width:0}
+.node-body b{display:block;font-size:15px;font-weight:650;letter-spacing:-.01em;margin-bottom:2px}
+.node-body span{font-size:12.5px;color:var(--txt-3)}
+.tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 9px;border-radius:6px;flex:none;font-weight:600;
+}
+.tag-on{background:rgba(0,229,160,.14);color:var(--acc);border:1px solid rgba(0,229,160,.3)}
+.tag-off{background:var(--panel-2);color:var(--txt-3);border:1px solid var(--line-soft)}
+.tag-lvl1{background:rgba(0,229,160,.1);color:var(--acc)}
+.tag-lvl2{background:rgba(251,191,36,.1);color:var(--amber)}
+.tag-lvl3{background:rgba(242,84,91,.1);color:var(--red)}
+@media(max-width:560px){
+  .node-card{flex-wrap:wrap;gap:10px}
+  .node-body{flex-basis:calc(100% - 41px)}
+}
+
+/* ============================================================
+   EĞİTİM KARTLARI + OYNATICI
+   ============================================================ */
+.course{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  overflow:hidden;margin-bottom:22px;transition:border-color .25s;
+}
+.course.done{border-color:rgba(0,229,160,.4)}
+.course-hd{
+  padding:20px 22px;display:flex;align-items:center;gap:16px;cursor:pointer;
+  transition:background .2s;
+}
+.course-hd:hover{background:var(--panel-2)}
+.course-idx{
+  width:42px;height:42px;border-radius:11px;flex:none;display:grid;place-items:center;
+  font-family:var(--mono);font-weight:750;font-size:16px;
+  background:var(--panel-2);border:1px solid var(--line);color:var(--txt-2);
+}
+.course.done .course-idx{background:var(--acc);color:#04120c;border-color:var(--acc)}
+.course-meta{flex:1;min-width:0}
+.course-meta b{display:block;font-size:16.5px;font-weight:680;letter-spacing:-.015em;margin-bottom:3px}
+.course-meta span{font-size:12.5px;color:var(--txt-3);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.course-pc{
+  font-family:var(--mono);font-size:20px;font-weight:700;color:var(--acc);flex:none;
+  font-variant-numeric:tabular-nums;
+}
+.chev{width:18px;height:18px;flex:none;color:var(--txt-3);transition:transform .3s}
+.course.open .chev{transform:rotate(180deg)}
+
+.course-bd{max-height:0;overflow:hidden;transition:max-height .45s cubic-bezier(.4,0,.2,1)}
+.course.open .course-bd{max-height:5200px}
+.course-inner{padding:0 22px 22px;border-top:1px solid var(--line-soft)}
+
+.player-box{
+  position:relative;background:#000;border-radius:12px;overflow:hidden;
+  aspect-ratio:16/9;margin:20px 0 0;border:1px solid var(--line);
+}
+.player-box iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.player-ph{
+  position:absolute;inset:0;display:grid;place-items:center;text-align:center;
+  background:linear-gradient(150deg,var(--panel-2),#000);color:var(--txt-3);padding:24px;
+  font-size:13.5px;gap:12px;
+}
+.player-ph.err{cursor:default;background:linear-gradient(150deg,#1a1208,#000)}
+.player-ph a{color:var(--acc);text-decoration:underline}
+.player-ph .play{
+  width:56px;height:56px;border-radius:50%;background:var(--acc);color:#04120c;
+  display:grid;place-items:center;margin:0 auto 6px;box-shadow:0 0 30px rgba(0,229,160,.4);
+  transition:transform .2s;
+}
+.player-ph:hover .play{transform:scale(1.08)}
+
+/* izleme çubuğu */
+.watch{margin-top:14px;background:var(--bg);border:1px solid var(--line-soft);border-radius:12px;padding:15px 17px}
+.watch-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:11px}
+.watch-title{font-size:13.5px;font-weight:620;flex:1;min-width:150px}
+.watch-num{font-family:var(--mono);font-size:12.5px;color:var(--txt-2);font-variant-numeric:tabular-nums}
+.bar{height:7px;background:var(--panel-2);border-radius:99px;overflow:hidden;position:relative}
+.bar i{
+  display:block;height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--acc-dim),var(--acc));
+  transition:width .35s ease;box-shadow:0 0 12px rgba(0,229,160,.5);
+}
+.bar.full i{background:linear-gradient(90deg,var(--acc),var(--blue))}
+.watch-foot{display:flex;align-items:center;gap:11px;flex-wrap:wrap;margin-top:12px}
+.hint{font-size:12px;color:var(--txt-3);flex:1;min-width:170px;line-height:1.45}
+.btn-done{
+  padding:10px 18px;border-radius:9px;font-size:13.5px;font-weight:650;
+  background:var(--panel-2);color:var(--txt-3);border:1px solid var(--line);
+  transition:.22s;cursor:not-allowed;
+}
+.btn-done.ready{background:var(--acc);color:#04120c;border-color:var(--acc);cursor:pointer;box-shadow:0 4px 18px rgba(0,229,160,.28)}
+.btn-done.ready:hover{transform:translateY(-1px)}
+.btn-done.ok{background:rgba(0,229,160,.13);color:var(--acc);border-color:rgba(0,229,160,.35);cursor:default}
+
+/* video listesi */
+.vlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:7px;margin-top:16px}
+.vchip{
+  aspect-ratio:1;border-radius:9px;display:grid;place-items:center;
+  background:var(--panel-2);border:1px solid var(--line-soft);
+  font-family:var(--mono);font-size:12.5px;color:var(--txt-3);
+  transition:.2s;position:relative;cursor:pointer;
+}
+.vchip:hover{border-color:var(--acc);color:var(--acc)}
+.vchip.done{background:rgba(0,229,160,.13);border-color:rgba(0,229,160,.36);color:var(--acc);font-weight:650}
+.vchip.now{border-color:var(--acc);color:var(--acc);box-shadow:0 0 0 2px rgba(0,229,160,.18)}
+.vchip.done::after{
+  content:"";position:absolute;top:3px;right:4px;width:4px;height:4px;border-radius:50%;background:var(--acc);
+}
+
+/* varlık kontrolü */
+.presence{
+  position:absolute;inset:0;z-index:9;display:none;place-items:center;
+  background:rgba(5,8,15,.93);backdrop-filter:blur(5px);text-align:center;padding:22px;
+}
+.presence.on{display:grid}
+.presence h4{font-size:18px;font-weight:700;margin-bottom:8px}
+.presence p{color:var(--txt-2);font-size:13.5px;margin-bottom:18px;max-width:34ch}
+.presence .ring{
+  font-family:var(--mono);font-size:12px;color:var(--amber);margin-top:12px;letter-spacing:.08em;
+}
+
+/* ============================================================
+   TAKVİM
+   ============================================================ */
+.weeks{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:13px}
+.week{
+  background:var(--panel);border:1px solid var(--line-soft);border-radius:13px;padding:18px;
+  position:relative;overflow:hidden;transition:.25s;
+}
+.week::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--line)}
+.week.now{border-color:rgba(0,229,160,.42);background:linear-gradient(160deg,rgba(0,229,160,.07),var(--panel) 60%)}
+.week.now::before{background:var(--acc);box-shadow:0 0 14px var(--acc)}
+.week.past{opacity:.55}
+.week.past::before{background:var(--acc-dim)}
+.week:hover{transform:translateY(-3px)}
+.week-no{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--txt-3);margin-bottom:9px;display:flex;justify-content:space-between;align-items:center}
+.week.now .week-no{color:var(--acc)}
+.week b{display:block;font-size:14.5px;font-weight:650;margin-bottom:5px;letter-spacing:-.01em}
+.week .dates{font-family:var(--mono);font-size:12px;color:var(--txt-2);margin-bottom:11px}
+.week .task{
+  font-size:12.5px;color:var(--txt-3);padding-top:11px;border-top:1px dashed var(--line-soft);
+}
+.week .task strong{color:var(--txt-2);font-weight:600}
+.pill-now{
+  font-family:var(--mono);font-size:9.5px;background:var(--acc);color:#04120c;
+  padding:2px 7px;border-radius:5px;letter-spacing:.1em;font-weight:750;
+}
+
+/* ============================================================
+   DEPARTMANLAR
+   ============================================================ */
+.deps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px}
+.dep{
+  background:var(--panel);border:1px solid var(--line-soft);border-radius:15px;padding:24px;
+  transition:.25s;position:relative;overflow:hidden;
+}
+.dep:hover{transform:translateY(-4px);border-color:var(--line)}
+.dep-ic{
+  width:42px;height:42px;border-radius:11px;display:grid;place-items:center;margin-bottom:15px;
+  font-family:var(--mono);font-weight:800;font-size:15px;
+}
+.dep:nth-child(1) .dep-ic{background:rgba(0,229,160,.14);color:var(--acc)}
+.dep:nth-child(2) .dep-ic{background:rgba(56,189,248,.14);color:var(--blue)}
+.dep:nth-child(3) .dep-ic{background:rgba(167,139,250,.14);color:var(--violet)}
+.dep h4{font-size:16.5px;font-weight:700;letter-spacing:-.015em;margin-bottom:3px}
+.dep .en{font-family:var(--mono);font-size:11px;color:var(--txt-3);margin-bottom:12px;letter-spacing:.04em}
+.dep p{font-size:13.5px;color:var(--txt-2);margin-bottom:16px}
+.dep-list{border-top:1px solid var(--line-soft);padding-top:13px}
+.dep-list u{
+  display:block;text-decoration:none;font-family:var(--mono);font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3);margin-bottom:8px;
+}
+.dep-list u+u{margin-top:14px}
+.dep-list li{
+  list-style:none;font-size:12.5px;color:var(--txt-2);padding-left:15px;position:relative;margin-bottom:5px;
+}
+.dep-list li::before{content:"▸";position:absolute;left:0;color:var(--acc);font-size:10px;top:1px}
+
+/* ============================================================
+   İLERLEME TABLOSU
+   ============================================================ */
+.board{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.board-hd{
+  padding:18px 22px;border-bottom:1px solid var(--line-soft);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.board-hd b{font-size:16px;font-weight:700;letter-spacing:-.01em}
+.board-hd .live{
+  font-family:var(--mono);font-size:10.5px;color:var(--acc);letter-spacing:.14em;text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;
+}
+.board-sum{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--txt-2)}
+.board-sum b{color:var(--acc);font-size:15px}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{
+  text-align:left;padding:11px 22px;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3);font-weight:600;
+  border-bottom:1px solid var(--line-soft);background:var(--bg-2);white-space:nowrap;
+}
+td{padding:13px 22px;border-bottom:1px solid var(--line-soft);font-size:14px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.me{background:rgba(0,229,160,.05)}
+tr.me td:first-child{box-shadow:inset 3px 0 0 var(--acc)}
+.rank{font-family:var(--mono);color:var(--txt-3);width:44px;font-size:13px}
+.rank.top{color:var(--amber);font-weight:700}
+.nm{display:flex;align-items:center;gap:10px;font-weight:580}
+.nm .av{
+  width:29px;height:29px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-family:var(--mono);font-size:11px;font-weight:750;background:var(--panel-2);color:var(--txt-2);
+  border:1px solid var(--line);
+}
+tr.me .nm .av{background:var(--acc);color:#04120c;border-color:var(--acc)}
+.tbar{display:flex;align-items:center;gap:11px;min-width:150px}
+.tbar .bar{flex:1;height:6px}
+.tbar span{font-family:var(--mono);font-size:12.5px;color:var(--txt-2);width:42px;text-align:right;font-variant-numeric:tabular-nums}
+.miss{font-family:var(--mono);font-size:12.5px}
+.miss.z{color:var(--txt-3)}
+.miss.w{color:var(--amber)}
+.miss.d{color:var(--red);font-weight:700}
+.board-ft{padding:14px 22px;background:var(--bg-2);font-size:12.5px;color:var(--txt-3);border-top:1px solid var(--line-soft)}
+.empty{padding:46px 22px;text-align:center;color:var(--txt-3);font-size:14px}
+
+/* ============================================================
+   KURAL KARTLARI
+   ============================================================ */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.rule{
+  background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;padding:22px;
+  position:relative;
+}
+.rule.warn{border-color:rgba(242,84,91,.3);background:linear-gradient(150deg,rgba(242,84,91,.06),var(--panel) 60%)}
+.rule-n{
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--txt-3);margin-bottom:11px;
+}
+.rule.warn .rule-n{color:var(--red)}
+.rule b{display:block;font-size:15.5px;font-weight:680;margin-bottom:7px;letter-spacing:-.01em}
+.rule p{font-size:13.5px;color:var(--txt-2)}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{
+  border-top:1px solid var(--line-soft);padding:40px 0;margin-top:30px;
+  position:relative;z-index:1;
+}
+.ft{display:flex;align-items:center;gap:16px;flex-wrap:wrap;color:var(--txt-3);font-size:13px}
+.ft .brand{color:var(--txt-2)}
+.ft-r{margin-left:auto;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,90px);z-index:200;
+  background:var(--panel);border:1px solid var(--acc);border-radius:12px;
+  padding:13px 20px;font-size:14px;font-weight:580;color:var(--txt);
+  box-shadow:0 14px 44px rgba(0,0,0,.6);transition:transform .4s cubic-bezier(.22,1,.36,1);
+  display:flex;align-items:center;gap:10px;max-width:calc(100vw - 40px);
+}
+.toast.on{transform:translate(-50%,0)}
+.toast.err{border-color:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="bg-fx">
+  <div class="grid"></div>
+  <div class="glow g1"></div><div class="glow g2"></div><div class="glow g3"></div>
+</div>
+
+<!-- ===================== NAV ===================== -->
+<nav class="nav" id="nav">
+  <div class="nav-in">
+    <div class="brand">
+      <div class="chip">DM</div>
+      <div>Dicle Mechatronics<small>Elektronik Ekibi</small></div>
+    </div>
+    <div class="nav-links">
+      <a href="#egitimler">Eğitimler</a>
+      <a href="#takvim">Takvim</a>
+      <a href="#yol">Yol Haritası</a>
+      <a href="#departmanlar">Departmanlar</a>
+      <a href="#tablo">İlerleme</a>
+    </div>
+    <div class="nav-me" id="navMe" style="display:none">
+      <div class="av" id="navAv">?</div>
+      <span id="navNm">—</span>
+      <span class="pc" id="navPc">0%</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== SİNEMATİK SCROLL HERO ===================== -->
+<section class="scrolly" id="scrolly">
+  <div class="stage" id="stage">
+    <canvas id="film"></canvas>
+    <div class="film-scrim"></div>
+
+    <div class="film-load" id="filmLoad">
+      <div>
+        <div class="fl-bar"><i id="flBar"></i></div>
+        <span id="flTxt">Hazırlanıyor</span>
+      </div>
+    </div>
+
+    <div class="film-ui">
+      <div class="film-cap">
+        <div class="cap" data-cap="0">
+          <div class="no">01 — ÖLÇÜM</div>
+          <h2>Önce ölçersin.</h2>
+          <p>Göremediğin bir şeyi tasarlayamazsın. Multimetre ve osiloskop, elektroniğin gözüdür — her şey buradan başlar.</p>
+        </div>
+        <div class="cap" data-cap="1">
+          <div class="no">02 — KOD</div>
+          <h2>Sonra ona akıl yazarsın.</h2>
+          <p>Devre neyi ne zaman yapacağını bilmiyorsa sadece bakırdır. Gömülü yazılım, karta karar verme yeteneği katar.</p>
+        </div>
+        <div class="cap" data-cap="2">
+          <div class="no">03 — HABERLEŞME</div>
+          <h2>Ve parçalar konuşmaya başlar.</h2>
+          <p>UART, SPI, I2C. Sensörden motora giden her veri bu hatlardan geçer. Sistem, ancak burada sistem olur.</p>
+        </div>
+      </div>
+
+      <div class="rail-row">
+        <div class="film-rail" id="rail">
+          <div class="seg"><i></i><span>Ölçüm</span></div>
+          <div class="seg"><i></i><span>Kod</span></div>
+          <div class="seg"><i></i><span>Haberleşme</span></div>
+        </div>
+        <div class="film-idx"><b id="fIdx">01</b> / 03</div>
+        <div class="film-cue" id="filmCue">
+          <span>Kaydır</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BAŞLIK ===================== -->
+<header class="hero">
+  <video class="hero-video" id="heroVideo" muted loop playsinline preload="none" aria-hidden="true"></video>
+  <div class="hero-veil"></div>
+  <svg class="hero-svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g id="traces"></g>
+  </svg>
+  <div class="wrap hero-in">
+    <div class="hero-badge rv"><span class="dot"></span><span id="phaseTxt">Yaz Kampı 2026 · Faz 1</span></div>
+    <h1 class="rv" data-d="1">
+      Elektronik Ekibi
+      <span class="l2">Yaz Kampı Programı</span>
+    </h1>
+    <p class="hero-lead rv" data-d="2">
+      <b>10 Ağustos – 21 Eylül</b> arasında üç temel başlıkta, <b>48 videoluk</b> ortak bir müfredat.
+      Okul açıldığında laboratuvara ve projeye hazır girmek için ekibin tamamı aynı zemine basacak.
+    </p>
+    <div class="cta-row rv" data-d="3">
+      <a href="#egitimler" class="btn btn-p">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Eğitimlere Başla
+      </a>
+      <a href="#tablo" class="btn btn-g">Ekip İlerlemesi</a>
+    </div>
+    <div class="rv" data-d="4">
+      <div class="cd-label" id="cdLabel">Programın bitmesine</div>
+      <div class="countdown" id="cd">
+        <div class="cd"><b id="cdD">--</b><span>Gün</span></div>
+        <div class="cd"><b id="cdH">--</b><span>Saat</span></div>
+        <div class="cd"><b id="cdM">--</b><span>Dakika</span></div>
+        <div class="cd"><b id="cdS">--</b><span>Saniye</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== İSTATİSTİK ===================== -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="stats rv">
+      <div class="stat"><b>3</b><span>Aktif eğitim başlığı</span></div>
+      <div class="stat"><b>48</b><span>Toplam video</span></div>
+      <div class="stat"><b>6</b><span>Haftalık program</span></div>
+      <div class="stat"><b id="statTeam">—</b><span>Ekip üyesi</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== GİRİŞ ===================== -->
+<section style="padding-top:20px" id="giris">
+  <div class="wrap">
+    <div class="gate rv" id="gate">
+      <div>
+        <h3 id="gateTitle">Önce kendini tanıt</h3>
+        <p id="gateText">
+          Adını yaz ve ekip liderinin sana özel verdiği 4 haneli kodu gir.
+          Bir kez girmen yeterli — tarayıcın hatırlar, ilerlemen kaldığın yerden devam eder.
+        </p>
+      </div>
+      <div class="gate-form" id="gateForm">
+        <input class="fld" id="inName" type="text" autocomplete="name" spellcheck="false"
+               placeholder="Ad Soyad" list="rosterList">
+        <datalist id="rosterList"></datalist>
+        <input class="fld pin" id="inPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+        <button class="btn btn-p" id="btnLogin">Giriş</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== EĞİTİMLER ===================== -->
+<section id="egitimler">
+  <div class="wrap">
+    <div class="eyebrow rv">Faz 1 · Aktif Müfredat</div>
+    <h2 class="sec rv" data-d="1">Şu an alınacak üç eğitim</h2>
+    <p class="sec-sub rv" data-d="2">
+      Videolar sayfanın içinde oynar. Sistem gerçek izleme süreni ölçer: ileri sararsan o bölüm sayılmaz,
+      videonun <b>%90'ını</b> izlemeden "Tamamladım" düğmesi açılmaz. Arada kısa bir <b>"buradayım"</b> kontrolü çıkar —
+      tıklamazsan sayaç durur.
+    </p>
+    <div id="courses"></div>
+  </div>
+</section>
+
+<!-- ===================== TAKVİM ===================== -->
+<section id="takvim">
+  <div class="wrap">
+    <div class="eyebrow rv">Zaman Çizelgesi</div>
+    <h2 class="sec rv" data-d="1">6 haftalık dağıtım</h2>
+    <p class="sec-sub rv" data-d="2">
+      Her hafta pazartesi başlar, pazar biter. Haftanın görevini o hafta içinde bitirmen gerekiyor.
+    </p>
+    <div class="weeks" id="weeks"></div>
+  </div>
+</section>
+
+<!-- ===================== KURALLAR ===================== -->
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="rules">
+      <div class="rule rv">
+        <div class="rule-n">Kural 01</div>
+        <b>Hafta içinde bitir</b>
+        <p>Haftanın videoları o haftanın pazar günü 23:59'a kadar tamamlanmalı. Erken bitirmek serbest, geç kalmak sayılmaz.</p>
+      </div>
+      <div class="rule rv" data-d="1">
+        <div class="rule-n">Kural 02</div>
+        <b>İzleme gerçek olmalı</b>
+        <p>Sistem ileri sarmayı ve arka planda açık bırakmayı tespit eder. Sadece gerçekten izlenen bölümler sayılır.</p>
+      </div>
+      <div class="rule rv warn" data-d="2">
+        <div class="rule-n">Kural 03 · Uyarı</div>
+        <b>3 hafta kaçıran ekipten çıkar</b>
+        <p>Yüz yüze toplantılardaki kuralın aynısı burada da geçerli: mazeretsiz 3 eksik hafta = ekip üyeliğinin sonu.</p>
+      </div>
+      <div class="rule rv" data-d="3">
+        <div class="rule-n">Kural 04</div>
+        <b>Takılırsan haber ver</b>
+        <p>Anlamadığın yer olursa hafta bitmeden ekip liderine yaz. Geç kalmanın mazereti anlamamak değil, söylememektir.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== YOL HARİTASI ===================== -->
+<section id="yol">
+  <div class="wrap">
+    <div class="eyebrow rv">Müfredat</div>
+    <h2 class="sec rv" data-d="1">Tam yol haritası</h2>
+    <p class="sec-sub rv" data-d="2">
+      Sıra rastgele değil — her başlık bir öncekinin üzerine kuruluyor. Faz 1'i bitiren ekip üyeleri
+      okul açıldığında sonraki başlıkları ve laboratuvar eğitimlerini almaya hak kazanır.
+    </p>
+    <div class="road rv" data-d="3" id="road"></div>
+  </div>
+</section>
+
+<!-- ===================== DEPARTMANLAR ===================== -->
+<section id="departmanlar">
+  <div class="wrap">
+    <div class="eyebrow rv">Yapı</div>
+    <h2 class="sec rv" data-d="1">Üç departman, tek zemin</h2>
+    <p class="sec-sub rv" data-d="2">
+      Departmanın ne olursa olsun Faz 1'deki üç başlık herkes için zorunlu. Uzmanlaşma ondan sonra başlıyor.
+    </p>
+    <div class="deps" id="deps"></div>
+  </div>
+</section>
+
+<!-- ===================== İLERLEME TABLOSU ===================== -->
+<section id="tablo">
+  <div class="wrap">
+    <div class="eyebrow rv">Şeffaf Takip</div>
+    <h2 class="sec rv" data-d="1">Ekip ilerlemesi</h2>
+    <p class="sec-sub rv" data-d="2">
+      Herkes herkesin nerede olduğunu görür. Amaç yarıştırmak değil — kimsenin geride kalmadığından emin olmak.
+    </p>
+    <div class="board rv" data-d="3">
+      <div class="board-hd">
+        <b>Canlı Tablo</b>
+        <span class="live"><span class="dot"></span>Otomatik</span>
+        <div class="board-sum">Ekip ortalaması: <b id="avgPc">—</b></div>
+      </div>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr>
+            <th class="rank">#</th><th>Üye</th><th>İlerleme</th><th>Video</th><th>Eksik hafta</th>
+          </tr></thead>
+          <tbody id="boardBody"></tbody>
+        </table>
+      </div>
+      <div class="board-ft" id="boardFt">Veri kaynağı bağlanmadı — aşağıdaki kurulum adımlarını tamamlayın.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap ft">
+    <div class="brand">
+      <div class="chip">DM</div>
+      <div>Dicle Mechatronics<small>Elektronik Ekibi · 2026</small></div>
+    </div>
+    <div class="ft-r">FAZ 1 · 10.08.2026 — 21.09.2026</div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+/* ============================================================
+   YAPILANDIRMA — Sadece burayı düzenleyin
+   ============================================================ */
+const CONFIG = {
+  /* Google Apps Script web uygulaması URL'si.
+     KURULUM.md dosyasındaki adımları izleyip aldığınız /exec ile biten
+     adresi tırnak içine yapıştırın. Boş bırakılırsa site "yerel mod"da
+     çalışır: ilerleme sadece kişinin kendi tarayıcısında saklanır. */
+  API_URL: "",
+
+  /* Sunucu bağlı DEĞİLKEN kullanılacak ortak giriş kodu.
+     Sunucu bağlanınca herkesin kendi kişisel kodu geçerli olur. */
+  LOCAL_PIN: "2121",
+
+  /* API bağlanana kadar isim alanında görünecek öneriler.
+     Bağlandıktan sonra liste Google E-Tablo'dan otomatik gelir. */
+  FALLBACK_ROSTER: [],
+
+  /* Başlık bloğunun arkasında sessizce dönen video.
+     Boş bırakılırsa animasyonlu devre yolları görünür. */
+  HERO_VIDEO: "hero/ambient.mp4",
+
+  /* Program tarihleri */
+  START: "2026-08-10T00:00:00+03:00",
+  END:   "2026-09-21T23:59:59+03:00",
+
+  /* Tamamlanmış sayılmak için gereken gerçek izleme oranı */
+  THRESHOLD: 0.90,
+
+  /* Varlık kontrolü: video başına kaç kez sorulacak (süreye göre) */
+  PRESENCE_MIN: 1,
+  PRESENCE_MAX: 3,
+  PRESENCE_TIMEOUT: 25 /* saniye */
+};
+
+/* ============================================================
+   MÜFREDAT VERİSİ
+   ============================================================ */
+const TOPICS = [
+  {
+    id:"t1", no:1,
+    title:"Temel Elektronik ve Ölçüm Teknikleri",
+    course:"Uygulamalı Temel Elektronik ve Laboratuvar Cihazları (Multimetre/Osiloskop)",
+    channel:"ELEKTRİK DERSLERİ",
+    playlistTitle:"ELEKTRİK ELEKTRONİK VE ÖLÇME",
+    list:"PLewYu_IeHK52R_COSAS4e4yilhIOvR7C2",
+    count:18, weeks:[1,2]
+  },
+  {
+    id:"t2", no:2,
+    title:"Gömülü Sistem Programlama",
+    course:"Sıfırdan Python ile Nesne Tabanlı Programlama ve Algoritma Temelleri",
+    channel:"Datai Team",
+    playlistTitle:"Python ile Nesne Tabanlı Programlama",
+    list:"PLQoYY0GU_Tk9otubzE0rIQrP2NiiYVnEg",
+    count:18, weeks:[3,4]
+  },
+  {
+    id:"t3", no:3,
+    title:"Endüstriyel Haberleşme Protokolleri",
+    course:"Mikrobilgisayar Mimarisi ve Seri Haberleşme (UART, SPI, I2C)",
+    channel:"GÖMÜLÜ SİSTEMLER AKADEMİSİ",
+    playlistTitle:"TEMEL HABERLEŞME PROTOKOLLERİ",
+    list:"PLLvF0xxuY_qAcHSiM8JoRQEyBGP3j7Jtf",
+    count:12, weeks:[5,6]
+  }
+];
+
+const ROADMAP = [
+  {no:1,  t:"Temel Elektronik ve Ölçüm Teknikleri", d:"Her şeyin temeli",                          lvl:1, active:true},
+  {no:2,  t:"Gömülü Sistem Programlama",            d:"Kontrol mantığını kavramak için",           lvl:1, active:true},
+  {no:3,  t:"Endüstriyel Haberleşme Protokolleri",  d:"Parçaların nasıl konuştuğunu anlamak için", lvl:1, active:true},
+  {no:4,  t:"Endüstriyel PCB Tasarımı",             d:"Devreyi kağıttan karta dökmek için",        lvl:1},
+  {no:5,  t:"Güç Elektroniği ve Voltaj Regülasyonu",d:"Sistemi yakmadan enerji vermek için",       lvl:2},
+  {no:6,  t:"Batarya Yönetim Sistemleri (BMS)",     d:"Enerji depolama güvenliği için",            lvl:2},
+  {no:7,  t:"Motor Sürücü Mimarisi ve Kontrolü",    d:"Hareket kabiliyeti için",                   lvl:2},
+  {no:8,  t:"Sensör Entegrasyonu ve Veri Analizi",  d:"Çevreyi algılamak için",                    lvl:2},
+  {no:9,  t:"Mekanik Entegrasyon ve CAD Tasarımı",  d:"Sistemi bir şasiye sığdırmak için",         lvl:3},
+  {no:10, t:"Profesyonel Prototipleme ve Lehimleme",d:"Laboratuvarda final birleştirme için",      lvl:3},
+  {no:11, t:"Ubuntu Linux ve ROS2 Altyapısı",       d:"Tüm sistemi tek merkezden yönetmek için",   lvl:3},
+  {no:12, t:"Dijital Tasarım ve ASIC/FPGA",         d:"En ileri seviye uzmanlık için",             lvl:3}
+];
+
+const DEPS = [
+  {ic:"01", n:"Donanım ve Üretim", en:"Hardware & Fabrication",
+   p:"Fiziksel kartlar, güç sistemleri ve mekanik uyumdan sorumlu.",
+   ortak:["Temel Elektronik","Prototipleme / Lehimleme","PCB Tasarımı (KiCad)"],
+   ozel:["Güç Elektroniği","BMS","ESC","CAD Tasarımı"]},
+  {ic:"02", n:"Gömülü Yazılım ve Haberleşme", en:"Embedded Systems & Comm.",
+   p:"Çiplerin programlanması ve sensör verilerinin akışından sorumlu.",
+   ortak:["Temel Elektronik","Gömülü Sistem Programlama","Haberleşme Protokolleri"],
+   ozel:["Sensör Entegrasyonu (Lidar)","Veri Analizi","Motor Kontrolü"]},
+  {ic:"03", n:"Sistem Mimari ve İleri Teknolojiler", en:"Systems & Advanced Tech",
+   p:"Robotik işletim sistemi, Linux altyapısı ve çip/FPGA süreçlerinden sorumlu.",
+   ortak:["Temel Elektronik","Gömülü Sistem Programlama","Ubuntu Linux"],
+   ozel:["ROS2 Altyapısı","ASIC/FPGA (OpenLane)","Dijital Tasarım"]}
+];
+
+/* ============================================================
+   YARDIMCILAR
+   ============================================================ */
+const $  = (s,r)=> (r||document).querySelector(s);
+const $$ = (s,r)=> Array.from((r||document).querySelectorAll(s));
+const pad2 = n => String(n).padStart(2,"0");
+const clamp = (v,a,b)=> Math.max(a,Math.min(b,v));
+const BUCKET = 5;                       // saniye — izleme çözünürlüğü
+const LS = "dm_elektronik_v1";
+const AY = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+
+function initials(n){
+  const p = String(n||"").trim().split(/\s+/);
+  return ((p[0]||"?")[0] + (p.length>1 ? p[p.length-1][0] : "")).toUpperCase();
+}
+function fmtDate(d){ return d.getDate()+" "+AY[d.getMonth()]; }
+function toast(msg, err){
+  const t = $("#toast"); $("#toastMsg").textContent = msg;
+  t.classList.toggle("err", !!err); t.classList.add("on");
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("on"), 3400);
+}
+
+/* ============================================================
+   HAFTA HESABI
+   ============================================================ */
+const START = new Date(CONFIG.START);
+const END   = new Date(CONFIG.END);
+
+function buildWeeks(){
+  const out = [];
+  for(let i=0;i<6;i++){
+    const a = new Date(START.getTime() + i*7*864e5);
+    let b = new Date(a.getTime() + 6*864e5);
+    b.setHours(23,59,59,999);
+    if(i===5) b = new Date(END);
+    out.push({no:i+1, from:a, to:b, items:[]});
+  }
+  TOPICS.forEach(t=>{
+    const half = Math.ceil(t.count/2);
+    const parts = [[0,half],[half,t.count]];
+    t.weeks.forEach((wNo,k)=>{
+      const [s,e] = parts[k];
+      if(e>s) out[wNo-1].items.push({topic:t, from:s, to:e});
+    });
+  });
+  return out;
+}
+const WEEKS = buildWeeks();
+
+function currentWeekNo(now){
+  const t = (now||new Date()).getTime();
+  for(const w of WEEKS){ if(t >= w.from.getTime() && t <= w.to.getTime()) return w.no; }
+  return t < START.getTime() ? 0 : 7;
+}
+
+/* ============================================================
+   DURUM (yerel + uzak)
+   ============================================================ */
+const store = {
+  me:null, pin:null,
+  data:{},                              // {topicId:{idx:{d,m,done}}}
+  counts:{},                            // playlist gerçek uzunlukları
+  queue:[],                             // sunucuya gidememiş kayıtlar
+  load(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(LS)||"{}");
+      this.me = raw.me||null; this.pin = raw.pin||null;
+      this.data = raw.data||{}; this.counts = raw.counts||{};
+      this.queue = raw.queue||[];
+    }catch(e){}
+  },
+  save(){
+    try{
+      localStorage.setItem(LS, JSON.stringify({
+        me:this.me, pin:this.pin, data:this.data, counts:this.counts, queue:this.queue
+      }));
+    }catch(e){}
+  },
+  /* sunucudan gelen tamamlanma kayıtlarını yerel duruma işler */
+  applyRemote(done){
+    if(!Array.isArray(done)) return 0;
+    let n = 0;
+    done.forEach(r=>{
+      const t = TOPICS.find(x=>x.id===r.topic); if(!t) return;
+      const i = Number(r.index) - 1; if(!(i >= 0)) return;
+      const v = this.vid(t.id, i);
+      if(!v.done){ v.done = true; n++; }
+      if(!v.d && r.duration) v.d = Number(r.duration);
+      /* sunucu "tamamlandı" diyorsa yerel maskeyi de dolu say */
+      const total = Math.max(1, Math.ceil((v.d||300)/BUCKET));
+      if(maskPct(v.m, total) < CONFIG.THRESHOLD) v.m = "1".repeat(total);
+    });
+    if(n) this.save();
+    return n;
+  },
+  vid(tid, idx){
+    this.data[tid] = this.data[tid] || {};
+    this.data[tid][idx] = this.data[tid][idx] || {d:0, m:"", done:false};
+    return this.data[tid][idx];
+  },
+  topicCount(t){ return this.counts[t.id] || t.count; },
+  topicDone(t){
+    const d = this.data[t.id]||{}; let n=0;
+    for(const k in d) if(d[k].done) n++;
+    return n;
+  },
+  totalVideos(){ return TOPICS.reduce((s,t)=> s + this.topicCount(t), 0); },
+  totalDone(){ return TOPICS.reduce((s,t)=> s + this.topicDone(t), 0); },
+  pct(){ const tv = this.totalVideos(); return tv ? Math.round(this.totalDone()/tv*100) : 0; }
+};
+store.load();
+
+/* Bitmaske yardımcıları */
+function maskGet(m,i){ return m.charAt(i) === "1"; }
+function maskSet(m,i,len){
+  if(m.length < len) m = m + "0".repeat(len - m.length);
+  if(i<0 || i>=len) return m;
+  return m.substring(0,i) + "1" + m.substring(i+1);
+}
+function maskPct(m,len){
+  if(!len) return 0;
+  let c=0; for(let i=0;i<m.length && i<len;i++) if(m.charAt(i)==="1") c++;
+  return c/len;
+}
+
+/* ============================================================
+   API (Google Apps Script)
+   ============================================================ */
+const api = {
+  on(){ return !!CONFIG.API_URL; },
+  async get(params){
+    if(!this.on()) return null;
+    const u = new URL(CONFIG.API_URL);
+    Object.keys(params||{}).forEach(k=> u.searchParams.set(k, params[k]));
+    const r = await fetch(u.toString(), {method:"GET"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return await r.json();
+  },
+  async post(body){
+    if(!this.on()) return null;
+    /* text/plain => preflight (CORS OPTIONS) tetiklenmez */
+    const r = await fetch(CONFIG.API_URL, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify(body)
+    });
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return await r.json();
+  }
+};
+
+/* ============================================================
+   BAŞLIK ARKA PLAN VİDEOSU
+   Dosya yoksa ya da tarayıcı oynatmayı reddederse sessizce
+   kaldırılır — devre yolu animasyonu görünmeye devam eder.
+   ============================================================ */
+(function heroVideo(){
+  const v = $("#heroVideo");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(!v) return;
+  if(!CONFIG.HERO_VIDEO || reduce){ v.remove(); return; }
+
+  const kill = ()=>{ v.remove(); document.body.classList.remove("hasvideo"); };
+  v.addEventListener("error", kill);
+  v.addEventListener("loadeddata", ()=>{
+    document.body.classList.add("hasvideo");
+    v.classList.add("on");
+    v.play().catch(kill);
+  });
+  document.addEventListener("visibilitychange", ()=>{
+    if(!v.isConnected) return;
+    document.hidden ? v.pause() : v.play().catch(()=>{});
+  });
+
+  /* görünür olunca yükle — açılışta bant genişliği harcamasın */
+  const io2 = new IntersectionObserver(es=>{
+    if(es.some(e=>e.isIntersecting)){
+      v.preload = "auto"; v.src = CONFIG.HERO_VIDEO; v.load();
+      io2.disconnect();
+    }
+  }, {rootMargin:"300px"});
+  io2.observe(v.parentElement);
+})();
+
+/* ============================================================
+   HERO — devre yolları
+   ============================================================ */
+(function traces(){
+  const g = $("#traces"); if(!g) return;
+  const NS = "http://www.w3.org/2000/svg";
+  const rnd = (a,b)=> a + Math.random()*(b-a);
+  for(let i=0;i<16;i++){
+    let x = rnd(-60, 1500), y = rnd(-40, 940);
+    let d = "M"+x.toFixed(0)+" "+y.toFixed(0);
+    const segs = Math.floor(rnd(3,7));
+    for(let s=0;s<segs;s++){
+      const horiz = Math.random() > .5;
+      const len = rnd(70, 260);
+      const dir = Math.random() > .5 ? 1 : -1;
+      if(horiz){ x += len*dir; d += " L"+x.toFixed(0)+" "+y.toFixed(0); }
+      else{ y += len*dir; d += " L"+x.toFixed(0)+" "+y.toFixed(0); }
+      /* 45° köşe */
+      const k = rnd(22,46);
+      x += k*(Math.random()>.5?1:-1); y += k*(Math.random()>.5?1:-1);
+      d += " L"+x.toFixed(0)+" "+y.toFixed(0);
+    }
+    const p = document.createElementNS(NS,"path");
+    p.setAttribute("d", d);
+    p.setAttribute("class", i%4===0 ? "trace-lit" : "trace");
+    if(i%4===0) p.style.animationDelay = (Math.random()*7).toFixed(2)+"s";
+    g.appendChild(p);
+    /* uç pedleri */
+    [[x,y]].forEach(([px,py])=>{
+      const c = document.createElementNS(NS,"circle");
+      c.setAttribute("cx",px.toFixed(0)); c.setAttribute("cy",py.toFixed(0));
+      c.setAttribute("r", i%4===0 ? 4 : 3);
+      c.setAttribute("class", i%4===0 ? "pad-lit" : "pad");
+      if(i%4===0) c.style.animationDelay = (Math.random()*3).toFixed(2)+"s";
+      g.appendChild(c);
+    });
+  }
+})();
+
+/* ============================================================
+   GERİ SAYIM
+   ============================================================ */
+(function countdown(){
+  function tick(){
+    const now = new Date();
+    let target = END, label = "Programın bitmesine";
+    if(now < START){ target = START; label = "Programın başlamasına"; }
+    let diff = Math.max(0, target - now);
+    const d = Math.floor(diff/864e5); diff -= d*864e5;
+    const h = Math.floor(diff/36e5);  diff -= h*36e5;
+    const m = Math.floor(diff/6e4);   diff -= m*6e4;
+    const s = Math.floor(diff/1e3);
+    $("#cdD").textContent = d; $("#cdH").textContent = pad2(h);
+    $("#cdM").textContent = pad2(m); $("#cdS").textContent = pad2(s);
+    $("#cdLabel").textContent = now > END ? "Program tamamlandı" : label;
+    const wn = currentWeekNo(now);
+    $("#phaseTxt").textContent = wn===0 ? "Yaz Kampı 2026 · Başlamak üzere"
+      : wn>6 ? "Yaz Kampı 2026 · Faz 1 tamamlandı"
+      : "Yaz Kampı 2026 · Faz 1 · Hafta "+wn+"/6";
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+/* ============================================================
+   RENDER — yol haritası / departmanlar / takvim
+   ============================================================ */
+(function renderRoad(){
+  const el = $("#road");
+  const activeN = ROADMAP.filter(r=>r.active).length;
+  el.style.setProperty("--road-fill", (activeN/ROADMAP.length*100).toFixed(1)+"%");
+  el.innerHTML = ROADMAP.map(r=>`
+    <div class="node ${r.active?"active":"locked"}">
+      <div class="node-card">
+        <div class="node-no">${pad2(r.no)}</div>
+        <div class="node-body"><b>${r.t}</b><span>${r.d}</span></div>
+        <span class="tag ${r.active?"tag-on":"tag-off"}">${r.active?"Aktif":"Sırada"}</span>
+        <span class="tag tag-lvl${r.lvl}">${r.lvl===1?"Temel":r.lvl===2?"Orta":"İleri"}</span>
+      </div>
+    </div>`).join("");
+})();
+
+(function renderDeps(){
+  $("#deps").innerHTML = DEPS.map(d=>`
+    <div class="dep rv">
+      <div class="dep-ic">${d.ic}</div>
+      <h4>${d.n}</h4>
+      <div class="en">${d.en}</div>
+      <p>${d.p}</p>
+      <div class="dep-list">
+        <u>Ortak bilinmesi gerekenler</u>
+        <ul>${d.ortak.map(x=>`<li>${x}</li>`).join("")}</ul>
+        <u>Departmana özel</u>
+        <ul>${d.ozel.map(x=>`<li>${x}</li>`).join("")}</ul>
+      </div>
+    </div>`).join("");
+})();
+
+function renderWeeks(){
+  const cur = currentWeekNo();
+  $("#weeks").innerHTML = WEEKS.map(w=>{
+    const cls = w.no===cur ? "now" : (w.no<cur ? "past" : "");
+    const body = w.items.map(it=>{
+      const doneInRange = (()=>{
+        const d = store.data[it.topic.id]||{}; let n=0;
+        for(let i=it.from;i<it.to;i++) if(d[i] && d[i].done) n++;
+        return n;
+      })();
+      const total = it.to - it.from;
+      return `<b>${it.topic.title}</b>
+        <div class="task"><strong>${it.from+1}–${it.to}. videolar</strong> · ${doneInRange}/${total} tamamlandı</div>`;
+    }).join("");
+    return `<div class="week ${cls} rv">
+      <div class="week-no"><span>Hafta ${pad2(w.no)}</span>${w.no===cur?'<span class="pill-now">ŞİMDİ</span>':""}</div>
+      ${body}
+      <div class="dates" style="margin-top:10px">${fmtDate(w.from)} — ${fmtDate(w.to)}</div>
+    </div>`;
+  }).join("");
+  reveal();
+}
+
+/* ============================================================
+   EĞİTİM KARTLARI
+   ============================================================ */
+function renderCourses(){
+  $("#courses").innerHTML = TOPICS.map(t=>{
+    const n = store.topicCount(t), done = store.topicDone(t);
+    const pc = n ? Math.round(done/n*100) : 0;
+    return `
+    <div class="course rv ${pc===100?"done":""}" id="c_${t.id}">
+      <div class="course-hd" data-tg="${t.id}">
+        <div class="course-idx">${pad2(t.no)}</div>
+        <div class="course-meta">
+          <b>${t.title}</b>
+          <span>${t.course} · ${t.channel} · ${n} video</span>
+        </div>
+        <div class="course-pc" id="pc_${t.id}">${pc}%</div>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="course-bd"><div class="course-inner">
+        <div class="player-box" id="pb_${t.id}">
+          <div class="player-ph" id="ph_${t.id}">
+            <div>
+              <div class="play"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+              <div><b style="color:var(--txt);font-size:15px">${t.playlistTitle}</b></div>
+              <div style="margin-top:6px">Oynatmak için tıkla — izleme süren buradan ölçülür</div>
+            </div>
+          </div>
+          <div class="presence" id="pr_${t.id}">
+            <div>
+              <h4>Hâlâ orada mısın?</h4>
+              <p>Videoyu arka planda açık bırakmadığından emin oluyoruz. Devam etmek için tıkla.</p>
+              <button class="btn btn-p" data-pres="${t.id}">Buradayım, devam et</button>
+              <div class="ring" id="rg_${t.id}">${CONFIG.PRESENCE_TIMEOUT} saniye</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="watch">
+          <div class="watch-top">
+            <div class="watch-title" id="wt_${t.id}">Video seçilmedi</div>
+            <div class="watch-num" id="wn_${t.id}">%0 izlendi</div>
+          </div>
+          <div class="bar" id="wb_${t.id}"><i></i></div>
+          <div class="watch-foot">
+            <div class="hint" id="wh_${t.id}">
+              Videonun %${Math.round(CONFIG.THRESHOLD*100)}'ını gerçekten izlediğinde düğme açılır.
+              İleri sarılan bölümler sayılmaz.
+            </div>
+            <button class="btn-done" id="wd_${t.id}" data-done="${t.id}" disabled>Tamamladım</button>
+          </div>
+        </div>
+
+        <div class="vlist" id="vl_${t.id}"></div>
+      </div></div>
+    </div>`;
+  }).join("");
+
+  TOPICS.forEach(t=> renderChips(t));
+
+  $$(".course-hd").forEach(h=> h.addEventListener("click", ()=>{
+    const t = TOPICS.find(x=>x.id===h.dataset.tg);
+    const c = $("#c_"+t.id);
+    c.classList.toggle("open");
+  }));
+  $$("#courses .player-ph").forEach(ph=> ph.addEventListener("click", (ev)=>{
+    if(ph.classList.contains("err") || ev.target.tagName === "A") return;
+    const tid = ph.id.slice(3);
+    engine.start(TOPICS.find(t=>t.id===tid));
+  }));
+  $$("[data-pres]").forEach(b=> b.addEventListener("click", ()=> engine.presenceOk(b.dataset.pres)));
+  $$("[data-done]").forEach(b=> b.addEventListener("click", ()=> engine.complete(b.dataset.done)));
+  reveal();
+}
+
+function renderChips(t){
+  const n = store.topicCount(t);
+  const d = store.data[t.id]||{};
+  const cur = engine.active && engine.active.topic.id===t.id ? engine.active.index : -1;
+  $("#vl_"+t.id).innerHTML = Array.from({length:n},(_,i)=>{
+    const done = d[i] && d[i].done;
+    return `<div class="vchip ${done?"done":""} ${i===cur?"now":""}" data-go="${t.id}:${i}" title="${i+1}. video${done?" · tamamlandı":""}">${i+1}</div>`;
+  }).join("");
+  $$("[data-go]", $("#vl_"+t.id)).forEach(c=> c.addEventListener("click", ()=>{
+    const [tid,ix] = c.dataset.go.split(":");
+    engine.start(TOPICS.find(x=>x.id===tid), parseInt(ix,10));
+  }));
+}
+
+function refreshTopic(t){
+  const n = store.topicCount(t), done = store.topicDone(t);
+  const pc = n ? Math.round(done/n*100) : 0;
+  $("#pc_"+t.id).textContent = pc+"%";
+  $("#c_"+t.id).classList.toggle("done", pc===100);
+  const meta = $("#c_"+t.id+" .course-meta span");
+  if(meta) meta.textContent = `${t.course} · ${t.channel} · ${n} video`;
+  renderChips(t);
+  renderWeeks();
+  updateMe();
+}
+
+function updateMe(){
+  const pc = store.pct();
+  $("#navPc").textContent = pc+"%";
+  if(store.me){
+    $("#navMe").style.display = "flex";
+    $("#navAv").textContent = initials(store.me);
+    $("#navNm").textContent = store.me.split(" ")[0];
+  }
+}
+</script>
+<script>
+/* ============================================================
+   İZLEME MOTORU — YouTube IFrame API
+   ============================================================ */
+const engine = {
+  players:{}, active:null, timer:null, ready:false, queue:[],
+
+  loadAPI(){
+    if(window.YT && window.YT.Player){ this.ready = true; this.flush(); return; }
+    if(document.getElementById("ytapi")) return;
+    const s = document.createElement("script");
+    s.id = "ytapi"; s.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(s);
+  },
+  flush(){ const q = this.queue.slice(); this.queue = []; q.forEach(f=>f()); },
+
+  start(topic, index){
+    if(!store.me){
+      document.getElementById("giris").scrollIntoView({behavior:"smooth"});
+      setTimeout(()=> $("#inName").focus(), 420);
+      toast("Önce adını yaz ve kodunu gir — yoksa ilerleme kaydedilmez.", true);
+      return;
+    }
+    const c = $("#c_"+topic.id); if(!c.classList.contains("open")) c.classList.add("open");
+    if(!this.ready){ this.queue.push(()=>this.start(topic,index)); this.loadAPI(); return; }
+
+    const ph = $("#ph_"+topic.id); if(ph) ph.style.display = "none";
+    const idx = (typeof index === "number") ? index : this.firstUndone(topic);
+
+    if(this.players[topic.id]){
+      this.players[topic.id].playVideoAt(idx);
+      this.bind(topic, idx);
+      return;
+    }
+    const mount = document.createElement("div");
+    mount.id = "yt_"+topic.id;
+    $("#pb_"+topic.id).appendChild(mount);
+
+    const vars = {
+      listType:"playlist", list:topic.list, index:idx,
+      rel:0, modestbranding:1, playsinline:1, autoplay:1, enablejsapi:1
+    };
+    /* yayındayken origin bildirmek gömülü oynatma hatalarını önler */
+    if(location.protocol === "http:" || location.protocol === "https:") vars.origin = location.origin;
+
+    this.players[topic.id] = new YT.Player(mount.id,{
+      playerVars:vars,
+      events:{
+        onError:(e)=> this.playerError(topic, e.data),
+        onReady:(e)=>{
+          const pl = e.target.getPlaylist();
+          if(pl && pl.length){ store.counts[topic.id] = pl.length; store.save(); refreshTopic(topic); }
+          e.target.playVideoAt(idx);
+          this.bind(topic, idx);
+        },
+        onStateChange:(e)=> this.onState(topic, e),
+        onPlaybackRateChange:(e)=>{
+          if(e.target.getPlaybackRate() > 1.5){
+            e.target.setPlaybackRate(1);
+            toast("Hızlandırma 1.5x ile sınırlı.", true);
+          }
+        }
+      }
+    });
+  },
+
+  /* YouTube gömülü oynatıcı hatası — kullanıcıya ne olduğunu anlat */
+  playerError(topic, code){
+    const ph = $("#ph_"+topic.id); if(!ph) return;
+    const local = location.protocol === "file:";
+    const url = "https://www.youtube.com/playlist?list=" + topic.list;
+    ph.classList.add("err"); ph.style.display = "grid";
+    ph.innerHTML = local
+      ? `<div>
+           <b style="color:var(--amber);font-size:15px">Yerel dosyada video oynatılamaz</b>
+           <div style="margin-top:8px;max-width:44ch">
+             YouTube, bilgisayardan doğrudan açılan sayfalarda gömülü oynatmayı engelliyor (hata ${code}).
+             Site yayına alınınca kendiliğinden düzelecek.
+           </div>
+         </div>`
+      : `<div>
+           <b style="color:var(--amber);font-size:15px">Bu video sayfa içinde oynatılamıyor</b>
+           <div style="margin-top:8px;max-width:44ch">
+             Kanal gömülü oynatmayı kapatmış (hata ${code}).
+             <a href="${url}" target="_blank" rel="noopener">YouTube'da aç</a> —
+             ancak orada izlersen süre sayılmaz, ekip liderine haber ver.
+           </div>
+         </div>`;
+  },
+
+  firstUndone(topic){
+    const n = store.topicCount(topic), d = store.data[topic.id]||{};
+    for(let i=0;i<n;i++) if(!(d[i] && d[i].done)) return i;
+    return 0;
+  },
+
+  bind(topic, index){
+    this.active = {topic, index, lastB:null, presence:[], waiting:false, wait:null};
+    $("#wt_"+topic.id).textContent = (index+1)+". video";
+    renderChips(topic);
+    this.paint();
+    if(!this.timer) this.timer = setInterval(()=> this.tick(), 1000);
+  },
+
+  onState(topic, e){
+    const p = e.target;
+    if(e.data === YT.PlayerState.PLAYING){
+      const i = p.getPlaylistIndex();
+      if(!this.active || this.active.topic.id!==topic.id || this.active.index!==i){
+        this.bind(topic, i);
+        this.planPresence(p.getDuration());
+      }else if(!this.active.presence.length){
+        this.planPresence(p.getDuration());
+      }
+    }
+    if(e.data === YT.PlayerState.ENDED){
+      const a = this.active; if(!a) return;
+      const v = store.vid(a.topic.id, a.index);
+      if(maskPct(v.m, Math.max(1,Math.ceil(v.d/BUCKET))) >= CONFIG.THRESHOLD && !v.done){
+        toast("Video bitti — 'Tamamladım' düğmesi açık.");
+      }
+    }
+  },
+
+  planPresence(dur){
+    if(!this.active || !dur) return;
+    let k = dur < 300 ? CONFIG.PRESENCE_MIN : dur < 900 ? 2 : CONFIG.PRESENCE_MAX;
+    const pts = [];
+    for(let i=1;i<=k;i++){
+      const base = dur * (i/(k+1));
+      pts.push(clamp(base + (Math.random()-.5)*dur*0.12, 15, dur-12));
+    }
+    this.active.presence = pts.sort((a,b)=>a-b);
+  },
+
+  tick(){
+    const a = this.active; if(!a) return;
+    const p = this.players[a.topic.id]; if(!p || !p.getPlayerState) return;
+
+    if(a.waiting){
+      a.wait--;
+      const rg = $("#rg_"+a.topic.id);
+      if(rg) rg.textContent = a.wait > 0 ? a.wait+" saniye" : "Sayaç durdu — devam etmek için tıkla";
+      if(a.wait <= 0 && rg) rg.style.color = "var(--red)";
+      return;
+    }
+    if(p.getPlayerState() !== YT.PlayerState.PLAYING) return;
+
+    const dur = p.getDuration(); if(!dur) return;
+    const cur = p.getCurrentTime();
+    const v = store.vid(a.topic.id, a.index);
+    v.d = Math.round(dur);
+    const total = Math.max(1, Math.ceil(dur/BUCKET));
+    const b = Math.min(total-1, Math.floor(cur/BUCKET));
+
+    /* Sadece kesintisiz oynatma sayılır: ileri sarılan aralık işaretlenmez */
+    if(a.lastB === null || b === a.lastB || b === a.lastB + 1){
+      if(!maskGet(v.m, b)) v.m = maskSet(v.m, b, total);
+    }
+    a.lastB = b;
+
+    /* varlık kontrolü zamanı geldi mi */
+    if(a.presence.length && cur >= a.presence[0]){
+      a.presence.shift();
+      this.askPresence(a.topic.id, p);
+    }
+    this.paint();
+    if((this.tick._n = (this.tick._n||0)+1) % 6 === 0) store.save();
+  },
+
+  askPresence(tid, p){
+    const a = this.active; if(!a) return;
+    p.pauseVideo();
+    a.waiting = true; a.wait = CONFIG.PRESENCE_TIMEOUT;
+    const el = $("#pr_"+tid); el.classList.add("on");
+    const rg = $("#rg_"+tid); if(rg){ rg.style.color = ""; rg.textContent = a.wait+" saniye"; }
+  },
+  presenceOk(tid){
+    const a = this.active; if(!a) return;
+    a.waiting = false; a.lastB = null;
+    $("#pr_"+tid).classList.remove("on");
+    const p = this.players[tid]; if(p) p.playVideo();
+  },
+
+  paint(){
+    const a = this.active; if(!a) return;
+    const v = store.vid(a.topic.id, a.index);
+    const total = Math.max(1, Math.ceil((v.d||1)/BUCKET));
+    const r = maskPct(v.m, total);
+    const pc = Math.round(r*100);
+    $("#wn_"+a.topic.id).textContent = "%"+pc+" izlendi";
+    const bar = $("#wb_"+a.topic.id);
+    bar.querySelector("i").style.width = pc+"%";
+    bar.classList.toggle("full", r >= CONFIG.THRESHOLD);
+    $("#wt_"+a.topic.id).textContent = (a.index+1)+". video";
+
+    const btn = $("#wd_"+a.topic.id);
+    const hint = $("#wh_"+a.topic.id);
+    if(v.done){
+      btn.className = "btn-done ok"; btn.disabled = true; btn.textContent = "Tamamlandı ✓";
+      hint.textContent = "Bu video kayıtlara geçti. Sıradakine geçebilirsin.";
+    }else if(r >= CONFIG.THRESHOLD){
+      btn.className = "btn-done ready"; btn.disabled = false; btn.textContent = "Tamamladım";
+      hint.textContent = "Yeterli izleme süresine ulaştın — kaydetmek için tıkla.";
+    }else{
+      btn.className = "btn-done"; btn.disabled = true; btn.textContent = "Tamamladım";
+      const kalan = Math.max(0, Math.ceil((CONFIG.THRESHOLD - r) * (v.d||0)));
+      hint.textContent = v.d
+        ? `Düğmenin açılması için yaklaşık ${Math.floor(kalan/60)} dk ${pad2(kalan%60)} sn daha izlemen gerekiyor.`
+        : `Videonun %${Math.round(CONFIG.THRESHOLD*100)}'ını gerçekten izlediğinde düğme açılır.`;
+    }
+  },
+
+  async complete(tid){
+    const a = this.active; if(!a || a.topic.id!==tid) return;
+    const v = store.vid(tid, a.index);
+    const total = Math.max(1, Math.ceil((v.d||1)/BUCKET));
+    const r = maskPct(v.m, total);
+    if(r < CONFIG.THRESHOLD || v.done) return;
+
+    v.done = true; v.ts = Date.now(); store.save();
+    refreshTopic(a.topic); this.paint();
+    toast(`${a.topic.title} · ${a.index+1}. video kaydedildi.`);
+
+    const ok = await sendOrQueue({
+      action:"complete", name:store.me, pin:store.pin,
+      topic:a.topic.id, topicTitle:a.topic.title,
+      index:a.index+1, watched:Math.round(r*100),
+      duration:v.d, week:currentWeekNo()
+    });
+    if(ok) loadBoard();
+    else toast("Kaydedildi. Bağlantı gelince sunucuya otomatik gönderilecek.", true);
+
+    const n = store.topicCount(a.topic);
+    if(a.index+1 < n){
+      setTimeout(()=>{
+        const p = this.players[tid];
+        if(p){ p.playVideoAt(a.index+1); this.bind(a.topic, a.index+1); this.planPresence(0); }
+      }, 900);
+    }
+  }
+};
+window.onYouTubeIframeAPIReady = function(){ engine.ready = true; engine.flush(); };
+
+/* ============================================================
+   GİRİŞ
+   ============================================================ */
+const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function fillRoster(list){
+  /* datalist yalnızca yazarken öneri gösterir — serbest yazım engellenmez */
+  $("#rosterList").innerHTML = list.map(n=>`<option value="${esc(n)}">`).join("");
+  $("#statTeam").textContent = list.length;
+}
+
+/* Sunucuya gidemeyen kayıtlar kuyrukta bekler, bağlantı gelince gönderilir */
+async function flushQueue(){
+  if(!api.on() || !store.queue.length || !navigator.onLine) return;
+  const pending = store.queue.slice();
+  const kept = [];
+  for(const item of pending){
+    try{ await api.post(item); }
+    catch(e){ kept.push(item); }
+  }
+  if(kept.length !== store.queue.length){
+    store.queue = kept; store.save();
+    if(!kept.length) toast("Bekleyen kayıtlar sunucuya gönderildi.");
+    loadBoard();
+  }
+}
+async function sendOrQueue(payload){
+  if(!api.on()) return true;
+  try{ await api.post(payload); return true; }
+  catch(e){ store.queue.push(payload); store.save(); return false; }
+}
+addEventListener("online", flushQueue);
+
+function gateDone(){
+  $("#gateTitle").textContent = "Hoş geldin, " + store.me.split(" ")[0];
+  $("#gateText").textContent = "İlerlemen kaydediliyor. Aşağıdan kaldığın yerden devam edebilirsin.";
+  $("#gateForm").innerHTML = `<a href="#egitimler" class="btn btn-p">Eğitimlere git</a>
+    <button class="btn btn-g" id="btnOut">Çıkış</button>`;
+  $("#btnOut").addEventListener("click", ()=>{
+    store.me = null; store.pin = null; store.save(); location.reload();
+  });
+  updateMe();
+}
+
+async function doLogin(){
+  const btn = $("#btnLogin");
+  const n = $("#inName").value.trim().replace(/\s+/g," ");
+  const p = $("#inPin").value.trim();
+  if(n.length < 3) return toast("Adını ve soyadını yaz.", true);
+  if(!/^\d{4}$/.test(p)) return toast("4 haneli kodu gir.", true);
+
+  if(!api.on()){                       /* yerel mod — ortak kod */
+    if(CONFIG.LOCAL_PIN && p !== CONFIG.LOCAL_PIN) return toast("Kod hatalı.", true);
+    store.me = n; store.pin = p; store.save();
+    gateDone(); loadBoard(); toast("Giriş yapıldı.");
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = "Kontrol ediliyor…";
+  try{
+    const r = await api.get({action:"auth", name:n, pin:p});
+    if(!r || !r.ok){
+      toast(r && r.error === "pin" ? "Kod hatalı." : "Bu isim listede yok — yazımını kontrol et.", true);
+      return;
+    }
+    /* sunucudaki yazımı esas al, ilerlemeyi geri yükle */
+    store.me = r.name; store.pin = p; store.save();
+    const restored = store.applyRemote(r.done);
+    TOPICS.forEach(refreshTopic);
+    gateDone(); loadBoard(); flushQueue();
+    toast(restored ? `Hoş geldin — ${restored} tamamlanmış video geri yüklendi.` : "Giriş yapıldı.");
+  }catch(e){
+    toast("Sunucuya ulaşılamadı. Bağlantını kontrol et.", true);
+  }finally{
+    btn.disabled = false; btn.textContent = "Giriş";
+  }
+}
+$("#btnLogin").addEventListener("click", doLogin);
+["#inName","#inPin"].forEach(s=> $(s).addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); }));
+
+/* açılışta sessizce sunucuyla eşitle */
+async function syncMe(){
+  if(!api.on() || !store.me || !store.pin) return;
+  try{
+    const r = await api.get({action:"auth", name:store.me, pin:store.pin});
+    if(r && r.ok){
+      store.me = r.name;
+      if(store.applyRemote(r.done)) TOPICS.forEach(refreshTopic);
+      store.save();
+    }
+  }catch(e){}
+}
+
+/* ============================================================
+   İLERLEME TABLOSU
+   ============================================================ */
+function missCell(m){
+  const cls = m>=3 ? "d" : m>0 ? "w" : "z";
+  const txt = m>=3 ? m+" · RİSKTE" : m+" hafta";
+  return `<span class="miss ${cls}">${txt}</span>`;
+}
+function renderBoard(rows, note){
+  const tb = $("#boardBody");
+  if(!rows || !rows.length){
+    tb.innerHTML = `<tr><td colspan="5"><div class="empty">Henüz kayıt yok. İlk videoyu tamamlayan burada görünür.</div></td></tr>`;
+    $("#avgPc").textContent = "—";
+  }else{
+    rows.sort((a,b)=> b.pct - a.pct || a.name.localeCompare(b.name,"tr"));
+    tb.innerHTML = rows.map((r,i)=>`
+      <tr class="${r.name===store.me?"me":""}">
+        <td class="rank ${i<3?"top":""}">${pad2(i+1)}</td>
+        <td><div class="nm"><span class="av">${initials(r.name)}</span>${r.name}</div></td>
+        <td><div class="tbar"><div class="bar"><i style="width:${r.pct}%"></i></div><span>%${r.pct}</span></div></td>
+        <td class="watch-num">${r.videos}/${r.total}</td>
+        <td>${missCell(r.missed||0)}</td>
+      </tr>`).join("");
+    const avg = Math.round(rows.reduce((s,r)=>s+r.pct,0)/rows.length);
+    $("#avgPc").textContent = "%"+avg;
+  }
+  if(note) $("#boardFt").textContent = note;
+}
+
+async function loadBoard(){
+  const total = store.totalVideos();
+  if(!api.on()){
+    const rows = store.me ? [{name:store.me, pct:store.pct(), videos:store.totalDone(), total, missed:0}] : [];
+    renderBoard(rows, "Yerel mod — ilerleme yalnızca bu tarayıcıda saklanıyor. Ekip geneli takip için KURULUM.md dosyasındaki adımları tamamlayın.");
+    return;
+  }
+  try{
+    const r = await api.get({action:"board", total:total});
+    if(r && r.roster && r.roster.length) fillRoster(r.roster);
+    renderBoard(r.rows||[], "Son güncelleme: " + new Date().toLocaleString("tr-TR"));
+  }catch(e){
+    renderBoard([], "Sunucuya ulaşılamadı. Bağlantını kontrol et.");
+  }
+}
+
+/* ============================================================
+   SİNEMATİK HERO — kare dizisi scroll motoru
+   ------------------------------------------------------------
+   hero/frame_000.jpg … frame_159.jpg dosyalarını scroll konumuna
+   göre canvas'a çizer. Kareler yoksa bölüm tamamen gizlenir.
+   ============================================================ */
+const film = (function(){
+  const COUNT = 160;
+  const path  = i => "hero/frame_" + String(i).padStart(3, "0") + ".jpg";
+
+  const wrapEl = $("#scrolly"), stage = $("#stage"), cv = $("#film");
+  if(!cv) return {};
+  const cx = cv.getContext("2d", {alpha:false});
+
+  const imgs = new Array(COUNT);
+  let loaded = 0, cur = -1, W = 0, Hh = 0, dpr = 1, raf = 0;
+
+  function resize(){
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = stage.clientWidth; Hh = stage.clientHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(Hh * dpr);
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cur = -1; paint();
+  }
+
+  function nearest(i){
+    for(let d = 0; d < COUNT; d++){
+      if(imgs[i - d]) return imgs[i - d];
+      if(imgs[i + d]) return imgs[i + d];
+    }
+    return null;
+  }
+
+  function draw(img){
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    const cover = Math.max(W / iw, Hh / ih), fit = W / iw;
+    /* dar/dikey ekranlarda aşırı kırpma yerine genişliğe sığdır */
+    const s = ((Hh / ih) / (W / iw) > 1.45) ? fit : cover;
+    const w = iw * s, h = ih * s;
+    cx.fillStyle = "#05080f"; cx.fillRect(0, 0, W, Hh);
+    cx.drawImage(img, (W - w) / 2, (Hh - h) / 2, w, h);
+  }
+
+  function progress(){
+    const r = wrapEl.getBoundingClientRect();
+    const span = r.height - Hh;
+    return span > 0 ? clamp(-r.top / span, 0, 1) : 0;
+  }
+
+  const caps = $$(".cap"), segs = $$("#rail .seg");
+  /* her fazın scroll aralığı — kare zaman çizelgesiyle aynı */
+  const BOUNDS = [[0.00, 0.345], [0.345, 0.645], [0.645, 1.00]];
+
+  function paintUI(p){
+    let act = 0;
+    BOUNDS.forEach((b, i)=>{ if(p >= b[0]) act = i; });
+    caps.forEach((c, i)=> c.classList.toggle("on", i === act));
+    segs.forEach((s, i)=>{
+      const [a, b] = BOUNDS[i];
+      const f = clamp((p - a) / (b - a), 0, 1) * 100;
+      s.querySelector("i").style.setProperty("--f", f.toFixed(1) + "%");
+      s.classList.toggle("on", i === act);
+    });
+    $("#fIdx").textContent = pad2(act + 1);
+    $("#filmCue").classList.toggle("hide", p > 0.03);
+  }
+
+  function paint(){
+    raf = 0;
+    const p = progress();
+    const i = Math.round(p * (COUNT - 1));
+    paintUI(p);
+    if(i === cur) return;
+    const img = imgs[i] || nearest(i);
+    if(img){ draw(img); cur = imgs[i] ? i : -1; }
+  }
+  function tick(){ if(!raf) raf = requestAnimationFrame(paint); }
+
+  function one(i){
+    return new Promise(res=>{
+      const im = new Image();
+      im.decoding = "async";
+      im.onload  = ()=>{ imgs[i] = im; loaded++; res(true); };
+      im.onerror = ()=> res(false);
+      im.src = path(i);
+    });
+  }
+
+  async function boot(){
+    const first = await one(0);
+    if(!first){                       /* kareler yüklenmemiş → bölümü gizle */
+      document.body.classList.add("nofilm");
+      $("#filmLoad").classList.add("done");
+      return;
+    }
+    resize();
+    const bar = $("#flBar"), lbl = $("#flTxt");
+    const order = [];
+    for(let i = 1; i < COUNT; i++) order.push(i);
+
+    let k = 0;
+    const CONC = 8;
+    async function worker(){
+      while(k < order.length){
+        const i = order[k++];
+        await one(i);
+        const pc = Math.round(loaded / COUNT * 100);
+        bar.style.width = pc + "%";
+        lbl.textContent = pc < 100 ? pc + "%" : "Hazır";
+        if(loaded === 12 || loaded === COUNT) $("#filmLoad").classList.add("done");
+        if(loaded % 8 === 0) tick();
+      }
+    }
+    await Promise.all(Array.from({length:CONC}, worker));
+    $("#filmLoad").classList.add("done");
+    cur = -1; tick();
+  }
+
+  addEventListener("scroll", tick, {passive:true});
+  addEventListener("resize", ()=>{ resize(); tick(); }, {passive:true});
+  resize();          /* ilk kare gelmeden önce de ölçüler doğru olsun */
+  boot();
+  return {tick};
+})();
+
+/* ============================================================
+   REVEAL / NAV / BAŞLAT
+   ============================================================ */
+let io;
+function reveal(){
+  if(!io){
+    io = new IntersectionObserver(es=>{
+      es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+    },{threshold:.12, rootMargin:"0px 0px -40px 0px"});
+  }
+  $$(".rv:not(.in)").forEach(el=> io.observe(el));
+}
+/* nav yalnızca sinematik bölüm bittikten sonra opaklaşır */
+addEventListener("scroll", ()=>{
+  const sc = $("#scrolly");
+  const past = sc && !document.body.classList.contains("nofilm")
+    ? sc.getBoundingClientRect().bottom < innerHeight * 0.9
+    : scrollY > 24;
+  $("#nav").classList.toggle("solid", past);
+}, {passive:true});
+
+fillRoster(CONFIG.FALLBACK_ROSTER);
+renderCourses();
+renderWeeks();
+reveal();
+updateMe();
+if(store.me) gateDone();
+loadBoard();
+syncMe();
+flushQueue();
+engine.loadAPI();
+addEventListener("beforeunload", ()=> store.save());
+</script>
+</body>
+</html>
