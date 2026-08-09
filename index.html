@@ -218,9 +218,35 @@ body.nofilm .stage>.scroll-hint{display:none}
 @media(max-width:640px){
   .film-cap{padding:0 20px;min-height:200px}
   .cap{left:20px;right:20px}
-  .film-rail{padding:22px 20px 0}
   .seg span{font-size:9px;letter-spacing:.08em}
-  .film-top{padding:74px 20px 0}
+}
+
+/* ---------- DİKEY EKRAN (telefon) ----------
+   Görsel üstte bir bant, metin hemen altında. Boş alan kalmaz. */
+body.portrait .scrolly{height:340vh}   /* telefonda daha kısa kaydırma */
+body.portrait .stage{display:block}
+body.portrait .film-scrim{
+  background:linear-gradient(0deg,rgba(5,8,15,.55) 0%,rgba(5,8,15,0) 30%);
+}
+/* metin + ray, bandın altında kalan alanda birlikte ortalanır */
+body.portrait .film-ui{
+  position:absolute;left:0;right:0;top:var(--bandBottom,54%);bottom:0;
+  display:flex;flex-direction:column;justify-content:center;padding:0 0 20px;
+}
+body.portrait .film-cap{flex:none;min-height:232px;position:relative;padding:0 22px}
+body.portrait .cap{top:0;bottom:auto;left:22px;right:22px;transform:translateY(26px)}
+body.portrait .cap.on{transform:none}
+body.portrait .cap .no{font-size:11px;margin-bottom:12px}
+body.portrait .cap h2{font-size:clamp(29px,8.4vw,42px);margin-bottom:11px;max-width:14ch}
+body.portrait .cap p{font-size:15px;line-height:1.55;max-width:36ch;color:var(--txt-2)}
+body.portrait .rail-row{margin-top:18px;padding:0 22px;gap:14px}
+body.portrait .film-cue{display:none}
+
+/* kısa telefonlarda sıkıştır */
+@media(max-height:700px){
+  body.portrait .film-cap{min-height:196px}
+  body.portrait .cap h2{font-size:clamp(24px,7vw,32px)}
+  body.portrait .cap p{font-size:13.5px;line-height:1.45}
 }
 
 /* yükleme göstergesi */
@@ -1888,11 +1914,33 @@ const film = (function(){
   const imgs = new Array(COUNT);
   let loaded = 0, cur = -1, W = 0, Hh = 0, dpr = 1, raf = 0;
 
+  /* Kare oranı sabit: 1600x900. Yerleşim buna göre önceden hesaplanır. */
+  const IW = 1600, IH = 900, SAFE = 1200;   // SAFE: yanlardan kırpılabilir güvenli genişlik
+  let PORTRAIT = false, PB = {x:0, y:0, w:0, h:0};
+
+  function layout(){
+    PORTRAIT = (W / Hh) < 0.9;
+    document.body.classList.toggle("portrait", PORTRAIT);
+    if(PORTRAIT){
+      /* Dikey ekran: genişliğe göre ölçekle, yanlardan biraz kırp,
+         görseli üst banda yerleştir. Altında kalan yer metne ayrılır. */
+      const s = W / SAFE, w = IW * s, h = IH * s;
+      const y = Math.min(Math.max(58, Hh * 0.105), Math.max(58, Hh * 0.62 - h));
+      PB = {x:(W - w) / 2, y, w, h};
+      stage.style.setProperty("--bandBottom", Math.round(PB.y + PB.h - 28) + "px");
+    }else{
+      const s = Math.max(W / IW, Hh / IH), w = IW * s, h = IH * s;
+      PB = {x:(W - w) / 2, y:(Hh - h) / 2, w, h};
+      stage.style.removeProperty("--bandBottom");
+    }
+  }
+
   function resize(){
     dpr = Math.min(2, window.devicePixelRatio || 1);
     W = stage.clientWidth; Hh = stage.clientHeight;
     cv.width = Math.round(W * dpr); cv.height = Math.round(Hh * dpr);
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    layout();
     cur = -1; paint();
   }
 
@@ -1905,13 +1953,16 @@ const film = (function(){
   }
 
   function draw(img){
-    const iw = img.naturalWidth, ih = img.naturalHeight;
-    const cover = Math.max(W / iw, Hh / ih), fit = W / iw;
-    /* dar/dikey ekranlarda aşırı kırpma yerine genişliğe sığdır */
-    const s = ((Hh / ih) / (W / iw) > 1.45) ? fit : cover;
-    const w = iw * s, h = ih * s;
     cx.fillStyle = "#05080f"; cx.fillRect(0, 0, W, Hh);
-    cx.drawImage(img, (W - w) / 2, (Hh - h) / 2, w, h);
+    cx.drawImage(img, PB.x, PB.y, PB.w, PB.h);
+    if(!PORTRAIT) return;
+    /* Bandın alt ve üst kenarını arka plana eriterek keskin kesik izlenimini kaldır */
+    let g = cx.createLinearGradient(0, PB.y + PB.h - 38, 0, PB.y + PB.h);
+    g.addColorStop(0, "rgba(5,8,15,0)"); g.addColorStop(1, "#05080f");
+    cx.fillStyle = g; cx.fillRect(0, PB.y + PB.h - 38, W, 39);
+    g = cx.createLinearGradient(0, PB.y, 0, PB.y + 24);
+    g.addColorStop(0, "#05080f"); g.addColorStop(1, "rgba(5,8,15,0)");
+    cx.fillStyle = g; cx.fillRect(0, PB.y - 1, W, 25);
   }
 
   function progress(){
